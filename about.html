@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About — Stackly</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+        rel="stylesheet" />
+
+    <!-- GSAP + ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js">
+    </script>
+
+    <!-- Three.js (background) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
+
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            cursor: default;
+        }
+
+        :root {
+            --pink: #e84393;
+            --pink-light: #ff7eb3;
+            --pink-dark: #c2186b;
+            --pink-glow: rgba(232, 67, 147, 0.15);
+
+            --cyan: #00b4d8;
+            --cyan-light: #48cae4;
+            --cyan-dark: #0077b6;
+            --cyan-glow: rgba(0, 180, 216, 0.15);
+
+            --blue: #4361ee;
+            --blue-light: #6c8cff;
+            --blue-dark: #2a3fa8;
+            --blue-glow: rgba(67, 97, 238, 0.12);
+
+            --bg-primary: #f5f0ff;
+            --bg-secondary: #ffffff;
+            --bg-elevated: #faf7ff;
+            --bg-card: rgba(255, 255, 255, 0.6);
+
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --text-muted: #8a8aaa;
+
+            --border-glass: rgba(232, 67, 147, 0.08);
+            --shadow-glass: 0 8px 32px rgba(67, 97, 238, 0.06);
+            --shadow-hover: 0 32px 80px rgba(67, 97, 238, 0.10);
+
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 10px;
+            --transition: 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            cursor: default;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            font-family: var(--font-body);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        p,
+        h1,
+        h2,
+        h3,
+        h4,
+        .footer-text {
+            user-select: text;
+            cursor: default;
+        }
+
+        a,
+        button,
+        .nav-link,
+        .cta-btn,
+        .footer-link,
+        .hamburger-toggle,
+        .logo,
+        .team-card,
+        .value-card,
+        .milestone-item {
+            cursor: pointer !important;
+        }
+
+        /* ============================================================
+           THREE.JS BACKGROUND
+           ============================================================ */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* ============================================================
+           NAVBAR — Glass with Gradient BG
+           ============================================================ */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 12px 0;
+            background: linear-gradient(135deg, rgba(232, 67, 147, 0.10), rgba(0, 180, 216, 0.10), rgba(67, 97, 238, 0.10));
+            backdrop-filter: blur(32px) saturate(220%);
+            -webkit-backdrop-filter: blur(32px) saturate(220%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.4s ease;
+            transform-style: preserve-3d;
+            perspective: 800px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+        }
+
+        .navbar.scrolled {
+            background: linear-gradient(135deg, rgba(232, 67, 147, 0.15), rgba(0, 180, 216, 0.15), rgba(67, 97, 238, 0.15));
+            backdrop-filter: blur(32px) saturate(220%);
+            -webkit-backdrop-filter: blur(32px) saturate(220%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.04);
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .logo img {
+            width: auto;
+            height: 70px;
+            display: block;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            transition: filter 0.3s ease, transform 0.3s ease;
+            filter: brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(900%) hue-rotate(315deg) brightness(105%) contrast(105%);
+        }
+
+        .logo img:hover {
+            filter: brightness(0) saturate(100%) invert(72%) sepia(50%) saturate(900%) hue-rotate(315deg) brightness(110%) contrast(110%);
+            transform: scale(1.04);
+        }
+
+        .logo .brand-text {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px 16px;
+            border-radius: 10px;
+            background: transparent;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 12px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--pink), var(--cyan), var(--blue));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2.5px;
+            background: linear-gradient(90deg, var(--pink), var(--cyan), var(--blue));
+            transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(232, 67, 147, 0.2);
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+            transform: translateY(-1px);
+        }
+
+        .nav-links a:hover::before {
+            opacity: 1;
+        }
+
+        .nav-links a:hover::after {
+            width: 60%;
+        }
+
+        .nav-links a:active {
+            transform: scale(0.97);
+        }
+
+        .nav-login {
+            padding: 10px 28px;
+            border-radius: 12px 0px 12px 0px;
+            background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 0.8rem !important;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 24px rgba(232, 67, 147, 0.20);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.04em;
+        }
+
+        .nav-login::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--cyan), var(--pink));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            border-radius: 12px 0px 12px 0px;
+        }
+
+        .nav-login:hover::before {
+            opacity: 1;
+        }
+
+        .nav-login span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-login::after {
+            display: none !important;
+        }
+
+        .nav-login:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 40px rgba(232, 67, 147, 0.30);
+            color: #fff !important;
+            background: transparent;
+        }
+
+        .nav-login:active {
+            transform: scale(0.97);
+        }
+
+        /* ── HAMBURGER ── */
+        .hamburger-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-toggle:hover {
+            background: rgba(255, 255, 255, 0.5);
+            border-color: rgba(232, 67, 147, 0.2);
+        }
+
+        .hamburger-toggle span {
+            display: block;
+            width: 28px;
+            height: 2.5px;
+            background: var(--text-primary);
+            border-radius: 4px;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-origin: center;
+        }
+
+        .hamburger-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger-toggle.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+
+        .hamburger-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* ── MOBILE NAV ── */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 100%;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(40px) saturate(220%);
+            -webkit-backdrop-filter: blur(40px) saturate(220%);
+            padding: 100px 36px 40px;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 999;
+            transition: right 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            border-left: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: -8px 0 40px rgba(0, 0, 0, 0.06);
+            overflow-y: auto;
+        }
+
+        .mobile-nav.open {
+            right: 0;
+        }
+
+        .mobile-nav::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(232, 67, 147, 0.03), rgba(0, 180, 216, 0.03));
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .mobile-nav a {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(232, 67, 147, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .mobile-nav a::after {
+            content: '→';
+            margin-left: auto;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            color: var(--pink);
+        }
+
+        .mobile-nav a:hover {
+            color: var(--pink);
+            padding-left: 8px;
+        }
+
+        .mobile-nav a:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .mobile-nav .nav-cta-mobile {
+            margin-top: 20px;
+            padding: 16px 32px;
+            border-radius: 12px 0px 12px 0px;
+            background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+            color: #fff !important;
+            font-weight: 600;
+            text-align: center;
+            border: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-nav .nav-cta-mobile:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 32px rgba(232, 67, 147, 0.25);
+            padding-left: 32px;
+        }
+
+        .mobile-nav .nav-cta-mobile::after {
+            display: none;
+        }
+
+        .mobile-nav .mobile-nav-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            padding: 12px 0 4px;
+            font-weight: 600;
+        }
+
+        .mobile-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .mobile-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ============================================================
+           ABOUT HERO
+           ============================================================ */
+        .about-hero {
+            position: relative;
+            z-index: 1;
+            min-height: 40vh;
+            display: flex;
+            align-items: center;
+            padding: 140px 0 80px;
+            overflow: hidden;
+            background: linear-gradient(160deg, #f5f0ff 0%, #e8e0f5 100%);
+        }
+
+        .about-hero .container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .about-hero .hero-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--pink);
+            background: rgba(232, 67, 147, 0.06);
+            padding: 6px 18px;
+            border-radius: 100px;
+            border: 1px solid rgba(232, 67, 147, 0.06);
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .about-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.08;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .about-hero h1 .highlight {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .about-hero p {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.8;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .about-hero .hero-curve {
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            z-index: 3;
+            pointer-events: none;
+            line-height: 0;
+        }
+
+        .about-hero .hero-curve svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* ============================================================
+           MISSION & VALUES — CENTERED
+           ============================================================ */
+        .mission-section {
+            position: relative;
+            z-index: 1;
+            padding: 80px 0 60px;
+            background: var(--bg-primary);
+            text-align: center;
+        }
+
+        .mission-section .section-label {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--pink);
+            background: rgba(232, 67, 147, 0.05);
+            padding: 4px 16px;
+            border-radius: 100px;
+            margin: 0 auto 12px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .mission-section .section-title {
+            font-family: var(--font-heading);
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .mission-section .section-title span {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .mission-section .section-sub {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 48px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .mission-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            text-align: left;
+        }
+
+        .mission-text {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .mission-text p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.8;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .mission-text .highlight-box {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(232, 67, 147, 0.04);
+            border-radius: 16px 0px 16px 0px;
+            padding: 24px 28px;
+            margin-top: 4px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .mission-text .highlight-box .quote {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-style: italic;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .mission-text .highlight-box .attribution {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .value-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(232, 67, 147, 0.04);
+            border-radius: 16px 0px 16px 0px;
+            padding: 20px 18px;
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .value-card:hover {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(232, 67, 147, 0.08);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(67, 97, 238, 0.06);
+        }
+
+        .value-card .icon {
+            font-size: 1.8rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .value-card h4 {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .value-card p {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* ============================================================
+           TEAM SECTION — CENTERED
+           ============================================================ */
+        .team-section {
+            position: relative;
+            z-index: 1;
+            padding: 80px 0 100px;
+            border-top: 1px solid rgba(232, 67, 147, 0.04);
+            border-bottom: 1px solid rgba(232, 67, 147, 0.04);
+            background: rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .team-section .section-label {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--pink);
+            background: rgba(232, 67, 147, 0.05);
+            padding: 4px 16px;
+            border-radius: 100px;
+            margin: 0 auto 12px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .team-section .section-title {
+            font-family: var(--font-heading);
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .team-section .section-title span {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .team-section .section-sub {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 48px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            text-align: center;
+        }
+
+        .team-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(232, 67, 147, 0.04);
+            border-radius: 20px 0px 20px 0px;
+            padding: 28px 20px 24px;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 4px 20px rgba(67, 97, 238, 0.04);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .team-card:hover {
+            transform: translateY(-6px);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 20px 56px rgba(67, 97, 238, 0.08);
+            border-color: rgba(232, 67, 147, 0.08);
+        }
+
+        .team-card .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--pink-light), var(--cyan-light));
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #fff;
+            font-family: var(--font-heading);
+            box-shadow: 0 8px 24px rgba(232, 67, 147, 0.10);
+        }
+
+        .team-card .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .team-card h4 {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .team-card .role {
+            color: var(--pink);
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .team-card p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+
+        .team-card .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .team-card .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(232, 67, 147, 0.04);
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .team-card .social-links a:hover {
+            color: var(--pink);
+            background: rgba(232, 67, 147, 0.04);
+            border-color: rgba(232, 67, 147, 0.12);
+            transform: translateY(-2px);
+        }
+
+        /* ============================================================
+           TIMELINE / MILESTONES — CENTERED
+           ============================================================ */
+        .timeline-section {
+            position: relative;
+            z-index: 1;
+            padding: 80px 0 100px;
+            background: var(--bg-primary);
+            text-align: center;
+        }
+
+        .timeline-section .section-label {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--pink);
+            background: rgba(232, 67, 147, 0.05);
+            padding: 4px 16px;
+            border-radius: 100px;
+            margin: 0 auto 12px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .timeline-section .section-title {
+            font-family: var(--font-heading);
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .timeline-section .section-title span {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .timeline-section .section-sub {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 48px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+            padding-left: 30px;
+            text-align: left;
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--pink), var(--cyan), var(--blue));
+            opacity: 0.2;
+        }
+
+        .milestone-item {
+            position: relative;
+            padding: 20px 0 20px 28px;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        .milestone-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 28px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--pink);
+            border: 3px solid var(--bg-primary);
+            box-shadow: 0 0 0 4px rgba(232, 67, 147, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .milestone-item:hover::before {
+            background: var(--cyan);
+            box-shadow: 0 0 0 6px rgba(0, 180, 216, 0.12);
+            transform: scale(1.1);
+        }
+
+        .milestone-item .year {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--pink);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .milestone-item h4 {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .milestone-item p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-width: 500px;
+        }
+
+        .milestone-item .tag {
+            display: inline-block;
+            font-size: 0.55rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 2px 12px;
+            border-radius: 100px;
+            background: rgba(232, 67, 147, 0.06);
+            color: var(--pink);
+            margin-top: 6px;
+        }
+
+        /* ============================================================
+           STATS BANNER (inline)
+           ============================================================ */
+        .stats-inline {
+            position: relative;
+            z-index: 1;
+            padding: 60px 0;
+            border-top: 1px solid rgba(232, 67, 147, 0.04);
+            border-bottom: 1px solid rgba(232, 67, 147, 0.04);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .stats-inline .container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            text-align: center;
+        }
+
+        .stats-inline .stat-item {
+            padding: 20px 16px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 16px 0px 16px 0px;
+            border: 1px solid rgba(232, 67, 147, 0.04);
+            backdrop-filter: blur(8px);
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .stats-inline .stat-item:hover {
+            transform: translateY(-4px);
+            border-color: rgba(232, 67, 147, 0.08);
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 12px 40px rgba(67, 97, 238, 0.06);
+        }
+
+        .stats-inline .stat-item .number {
+            font-family: var(--font-heading);
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            line-height: 1.2;
+        }
+
+        .stats-inline .stat-item .label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* ============================================================
+           CTA — CENTERED
+           ============================================================ */
+        .cta-section {
+            position: relative;
+            z-index: 1;
+            padding: 100px 0;
+            border-top: 1px solid rgba(232, 67, 147, 0.04);
+            text-align: center;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(245, 240, 255, 0.4));
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .cta-section h2 {
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .cta-section h2 span {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-section p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+
+        .cta-section .btn-primary {
+            padding: 16px 40px;
+            border-radius: 14px 0px 14px 0px;
+            background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 32px rgba(232, 67, 147, 0.20);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--cyan), var(--pink));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            border-radius: 14px 0px 14px 0px;
+        }
+
+        .cta-section .btn-primary:hover::before {
+            opacity: 1;
+        }
+
+        .cta-section .btn-primary span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-section .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 48px rgba(232, 67, 147, 0.30);
+        }
+
+        /* ============================================================
+           FOOTER — Glass-morphism
+           ============================================================ */
+        .footer-glass {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            margin-top: 0;
+            border-radius: 1.5rem 1.5rem 0 0;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(232, 67, 147, 0.06);
+            border-bottom: none;
+            overflow: hidden;
+            padding: 3rem 0 1.5rem;
+        }
+
+        .footer-glass .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-glass::before {
+            content: '';
+            position: absolute;
+            top: -3rem;
+            left: 25%;
+            width: 18rem;
+            height: 18rem;
+            border-radius: 50%;
+            background: var(--pink-glow);
+            filter: blur(80px);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .footer-glass::after {
+            content: '';
+            position: absolute;
+            bottom: -2rem;
+            right: 20%;
+            width: 20rem;
+            height: 20rem;
+            border-radius: 50%;
+            background: var(--cyan-glow);
+            filter: blur(80px);
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+        }
+
+        .footer-brand-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .footer-brand-section .logo {
+            font-size: 1.2rem;
+            gap: 0.75rem;
+        }
+
+        .footer-brand-section .logo img {
+            height: 70px;
+            width: auto;
+            border: none;
+            outline: none;
+            filter: brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(900%) hue-rotate(315deg) brightness(105%) contrast(105%);
+        }
+
+        .footer-brand-section .logo .brand-text {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            max-width: 280px;
+            margin: 1rem auto 1.5rem;
+        }
+
+        .footer-social-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .footer-social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.4rem;
+            height: 2.4rem;
+            border-radius: 50%;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(232, 67, 147, 0.06);
+        }
+
+        .footer-social-links a:hover {
+            color: var(--pink);
+            background: rgba(232, 67, 147, 0.04);
+            transform: translateY(-3px);
+            border-color: rgba(232, 67, 147, 0.12);
+        }
+
+        .footer-social-links a svg {
+            width: 1.2rem;
+            height: 1.2rem;
+            fill: currentColor;
+        }
+
+        .footer-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .footer-column h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 0.6rem;
+        }
+
+        .footer-column ul li a {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--pink);
+        }
+
+        .footer-column ul li .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-column ul li .contact-item svg {
+            width: 1.1rem;
+            height: 1.1rem;
+            flex-shrink: 0;
+            color: var(--pink);
+        }
+
+        .footer-column ul li .contact-item address {
+            font-style: normal;
+        }
+
+        .footer-bottom {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(232, 67, 147, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            text-align: center;
+        }
+
+        .footer-bottom p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-bottom .footer-bottom-links {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .footer-bottom .footer-bottom-links a {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-bottom .footer-bottom-links a:hover {
+            color: var(--pink);
+        }
+
+        @media (min-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr 2fr;
+                gap: 3rem;
+            }
+
+            .footer-brand-section {
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .footer-description {
+                margin: 1rem 0 1.5rem;
+            }
+
+            .footer-social-links {
+                justify-content: flex-start;
+            }
+
+            .footer-columns {
+                grid-template-columns: repeat(4, 1fr);
+                text-align: left;
+                gap: 1.5rem;
+            }
+
+            .footer-column ul li .contact-item {
+                justify-content: flex-start;
+            }
+
+            .footer-bottom {
+                flex-direction: row;
+                justify-content: space-between;
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .footer-columns {
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+            }
+
+            .footer-glass {
+                border-radius: 1rem 1rem 0 0;
+                padding: 2rem 0 1rem;
+            }
+
+            .footer-brand-section .logo img {
+                height: 50px;
+            }
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 1024px) {
+            .mission-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .about-hero h1 {
+                font-size: 3.2rem;
+            }
+
+            .stats-inline .container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hamburger-toggle {
+                display: flex;
+            }
+
+            .mobile-nav {
+                display: flex;
+            }
+
+            .about-hero {
+                padding: 120px 0 60px;
+                min-height: 30vh;
+            }
+
+            .about-hero h1 {
+                font-size: 2.6rem;
+            }
+
+            .about-hero p {
+                font-size: 1rem;
+            }
+
+            .mission-section {
+                padding: 50px 0 40px;
+            }
+
+            .mission-section .section-title {
+                font-size: 2.2rem;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .team-section {
+                padding: 50px 0 60px;
+            }
+
+            .team-section .section-title {
+                font-size: 2.2rem;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+
+            .team-card {
+                padding: 20px 16px;
+            }
+
+            .team-card .avatar {
+                width: 64px;
+                height: 64px;
+                font-size: 1.4rem;
+            }
+
+            .timeline-section {
+                padding: 50px 0 60px;
+            }
+
+            .timeline-section .section-title {
+                font-size: 2.2rem;
+            }
+
+            .stats-inline .container {
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+
+            .stats-inline .stat-item .number {
+                font-size: 2.2rem;
+            }
+
+            .cta-section h2 {
+                font-size: 2.2rem;
+            }
+
+            .logo img {
+                height: 50px;
+            }
+
+            .about-hero .hero-curve svg {
+                height: 40px;
+            }
+
+            .milestone-item {
+                padding: 16px 0 16px 24px;
+            }
+
+            .milestone-item .year {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .about-hero h1 {
+                font-size: 2rem;
+            }
+
+            .about-hero p {
+                font-size: 0.95rem;
+            }
+
+            .mission-section .section-title {
+                font-size: 1.8rem;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .team-card {
+                padding: 16px 12px;
+            }
+
+            .team-card .avatar {
+                width: 56px;
+                height: 56px;
+                font-size: 1.2rem;
+            }
+
+            .team-card h4 {
+                font-size: 0.85rem;
+            }
+
+            .team-card .role {
+                font-size: 0.65rem;
+            }
+
+            .team-card p {
+                font-size: 0.7rem;
+            }
+
+            .team-section .section-title {
+                font-size: 1.8rem;
+            }
+
+            .timeline-section .section-title {
+                font-size: 1.8rem;
+            }
+
+            .stats-inline .container {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .stats-inline .stat-item {
+                padding: 14px 10px;
+            }
+
+            .stats-inline .stat-item .number {
+                font-size: 1.8rem;
+            }
+
+            .stats-inline .stat-item .label {
+                font-size: 0.7rem;
+            }
+
+            .cta-section h2 {
+                font-size: 1.8rem;
+            }
+
+            .cta-section .btn-primary {
+                padding: 14px 28px;
+                font-size: 0.9rem;
+            }
+
+            .container {
+                padding: 0 16px;
+            }
+
+            .logo img {
+                height: 60px;
+            }
+
+            .footer-columns {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+
+            .footer-glass {
+                border-radius: 0.75rem 0.75rem 0 0;
+                padding: 1.5rem 0 1rem;
+            }
+
+            .footer-brand-section .logo img {
+                height: 60px;
+            }
+
+            .mobile-nav {
+                padding: 80px 20px 30px;
+            }
+
+            .mobile-nav a {
+                font-size: 1rem;
+                padding: 12px 0;
+            }
+
+            .timeline {
+                padding-left: 20px;
+            }
+
+            .timeline::before {
+                left: 4px;
+            }
+
+            .milestone-item::before {
+                left: -22px;
+                width: 12px;
+                height: 12px;
+            }
+
+            .milestone-item {
+                padding: 14px 0 14px 20px;
+            }
+
+            .milestone-item .year {
+                font-size: 1rem;
+            }
+
+            .milestone-item h4 {
+                font-size: 0.95rem;
+            }
+
+            .milestone-item p {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* ============================================================
+           UTILITY
+           ============================================================ */
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.75;
+            }
+
+            50% {
+                transform: scale(1.8);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============================================================
+    THREE.JS BACKGROUND
+    ============================================================ -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- ============================================================
+    MOBILE OVERLAY
+    ============================================================ -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- ============================================================
+    MOBILE NAV
+    ============================================================ -->
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-label">Navigation</div>
+        <a href="index.html">🏠 Home</a>
+        <a href="about.html" style="color:var(--pink);">🏢 About</a>
+        <a href="services.html">⚡ Services</a>
+        <a href="contact.html">💬 Contact</a>
+        <div class="mobile-nav-label" style="margin-top:16px;">Account</div>
+        <a href="login.html" class="nav-cta-mobile">🔑 Login</a>
+    </nav>
+
+    <!-- ============================================================
+    NAVBAR
+    ============================================================ -->
+    <header class="navbar" id="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="logo.webp" alt="Stackly" loading="lazy" />
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html" style="color:var(--pink);">About</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html" class="nav-login"><span>🔑 Login</span></a></li>
+            </ul>
+
+            <button class="hamburger-toggle" id="hamburgerToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    ABOUT HERO
+    ============================================================ -->
+    <section class="about-hero" id="aboutHero">
+        <div class="container">
+            <span class="hero-badge" id="heroBadge">🏢 About Stackly</span>
+            <h1>
+                We're building the <span class="highlight">future</span><br />
+                of financial technology
+            </h1>
+            <p id="heroDesc">
+                Stackly was born from a simple idea: make financial intelligence
+                accessible, powerful, and beautifully simple. Today, we're proud
+                to serve thousands of businesses across the globe.
+            </p>
+        </div>
+
+        <!-- Curvy Wave -->
+        <div class="hero-curve">
+            <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,30 C360,80 720,10 1080,50 C1260,70 1380,40 1440,30 L1440,80 L0,80 Z" fill="#f5f0ff"
+                    opacity="1" />
+                <path d="M0,50 C240,70 480,20 720,55 C960,90 1200,35 1440,50 L1440,80 L0,80 Z" fill="#f5f0ff"
+                    opacity="0.4" />
+            </svg>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    MISSION & VALUES — CENTERED HEADINGS
+    ============================================================ -->
+    <section class="mission-section" id="missionSection">
+        <div class="container">
+            <span class="section-label" id="missionLabel">✦ Our Mission</span>
+            <h2 class="section-title" id="missionTitle">
+                Empowering the <span>next generation</span><br />
+                of financial innovation
+            </h2>
+            <p class="section-sub" id="missionSub">
+                We believe that financial technology should be open, intelligent,
+                and human‑centered. Our mission is to democratize access to
+                world‑class financial tools.
+            </p>
+
+            <div class="mission-grid">
+                <div class="mission-text">
+                    <p id="missionText1">
+                        Stackly was founded in 2020 by a team of engineers, designers,
+                        and finance professionals who saw an opportunity to rebuild
+                        financial infrastructure from the ground up. We combine
+                        cutting‑edge AI with a relentless focus on user experience.
+                    </p>
+                    <p id="missionText2">
+                        Today, we serve over 18,000 active users across 54 countries,
+                        processing millions of transactions every month. Our platform
+                        is trusted by startups, enterprises, and everyone in between.
+                    </p>
+                </div>
+
+                <div class="values-grid" id="valuesGrid">
+                    <div class="value-card" data-delay="0">
+                        <span class="icon">💡</span>
+                        <h4>Innovation First</h4>
+                        <p>We embrace emerging technologies and push the boundaries of what's possible in FinTech.</p>
+                    </div>
+                    <div class="value-card" data-delay="0.05">
+                        <span class="icon">🤝</span>
+                        <h4>Trust &amp; Transparency</h4>
+                        <p>We believe in open communication, honest feedback, and building systems that are verifiable.</p>
+                    </div>
+                    <div class="value-card" data-delay="0.1">
+                        <span class="icon">🌍</span>
+                        <h4>Global Perspective</h4>
+                        <p>We design for a borderless world, supporting diverse currencies, languages, and cultures.</p>
+                    </div>
+                    <div class="value-card" data-delay="0.15">
+                        <span class="icon">🧘</span>
+                        <h4>Human‑Centered</h4>
+                        <p>Technology should serve people — not the other way around. We put users at the heart of
+                            everything.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    STATS INLINE
+    ============================================================ -->
+    <section class="stats-inline" id="statsInline">
+        <div class="container">
+            <div class="stat-item" data-delay="0">
+                <span class="number" id="stat1">0</span>
+                <span class="label">Active Users</span>
+            </div>
+            <div class="stat-item" data-delay="0.05">
+                <span class="number" id="stat2">0</span>
+                <span class="label">Transactions / mo</span>
+            </div>
+            <div class="stat-item" data-delay="0.1">
+                <span class="number" id="stat3">0</span>
+                <span class="label">Countries</span>
+            </div>
+            <div class="stat-item" data-delay="0.15">
+                <span class="number" id="stat4">0</span>
+                <span class="label">Uptime %</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    TEAM SECTION — CENTERED HEADINGS
+    ============================================================ -->
+    <section class="team-section" id="teamSection">
+        <div class="container">
+            <span class="section-label" id="teamLabel">👥 Meet the Team</span>
+            <h2 class="section-title" id="teamTitle">
+                The people behind <span>Stackly</span>
+            </h2>
+            <p class="section-sub" id="teamSub">
+                We're a diverse group of engineers, designers, and dreamers who
+                are passionate about building the future of finance.
+            </p>
+
+            <div class="team-grid" id="teamGrid">
+                <div class="team-card" data-delay="0">
+                    <div class="avatar">AK</div>
+                    <h4>Aisha Kumar</h4>
+                    <span class="role">Co‑founder &amp; CEO</span>
+                    <p>Former fintech exec with a passion for inclusive design.</p>
+                    <div class="social-links">
+                        <a href="404.html" aria-label="LinkedIn">in</a>
+                        <a href="404.html" aria-label="Twitter">🐦</a>
+                    </div>
+                </div>
+
+                <div class="team-card" data-delay="0.05">
+                    <div class="avatar">MR</div>
+                    <h4>Marcus Reed</h4>
+                    <span class="role">Co‑founder &amp; CTO</span>
+                    <p>Distributed systems architect and open‑source contributor.</p>
+                    <div class="social-links">
+                        <a href="404.html" aria-label="LinkedIn">in</a>
+                        <a href="404.html" aria-label="GitHub">🐙</a>
+                    </div>
+                </div>
+
+                <div class="team-card" data-delay="0.1">
+                    <div class="avatar">JL</div>
+                    <h4>Jenna Liu</h4>
+                    <span class="role">Head of Product</span>
+                    <p>Product strategist with a focus on user‑centric design.</p>
+                    <div class="social-links">
+                        <a href="404.html" aria-label="LinkedIn">in</a>
+                        <a href="404.html" aria-label="Dribbble">🎨</a>
+                    </div>
+                </div>
+
+                <div class="team-card" data-delay="0.15">
+                    <div class="avatar">DS</div>
+                    <h4>David Singh</h4>
+                    <span class="role">Head of Engineering</span>
+                    <p>Scalability expert and former lead at a top payment processor.</p>
+                    <div class="social-links">
+                        <a href="404.html" aria-label="LinkedIn">in</a>
+                        <a href="404.html" aria-label="GitHub">🐙</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    TIMELINE / MILESTONES — CENTERED HEADINGS
+    ============================================================ -->
+    <section class="timeline-section" id="timelineSection">
+        <div class="container">
+            <span class="section-label" id="timelineLabel">📅 Our Journey</span>
+            <h2 class="section-title" id="timelineTitle">
+                Milestones that <span>matter</span>
+            </h2>
+            <p class="section-sub" id="timelineSub">
+                From a small team with a big idea to a global platform — here are
+                some of the key moments that shaped Stackly.
+            </p>
+
+            <div class="timeline" id="timeline">
+                <div class="milestone-item" data-delay="0">
+                    <span class="year">2020</span>
+                    <h4>Stackly is founded</h4>
+                    <p>Three co‑founders came together with a vision to rebuild financial infrastructure for the modern
+                        era.</p>
+                    <span class="tag">Launch</span>
+                </div>
+
+                <div class="milestone-item" data-delay="0.1">
+                    <span class="year">2021</span>
+                    <h4>Beta launch &amp; first 1,000 users</h4>
+                    <p>Stackly opened its doors to early adopters, quickly gaining traction among startups and
+                        developers.</p>
+                    <span class="tag">Growth</span>
+                </div>
+
+                <div class="milestone-item" data-delay="0.2">
+                    <span class="year">2022</span>
+                    <h4>Series A funding &amp; global expansion</h4>
+                    <p>Raised $25M to expand our team, scale our infrastructure, and launch in 30+ new countries.</p>
+                    <span class="tag">Funding</span>
+                </div>
+
+                <div class="milestone-item" data-delay="0.3">
+                    <span class="year">2023</span>
+                    <h4>AI analytics &amp; enterprise launch</h4>
+                    <p>Launched our flagship AI‑powered analytics suite and signed our first enterprise customers.</p>
+                    <span class="tag">Innovation</span>
+                </div>
+
+                <div class="milestone-item" data-delay="0.4">
+                    <span class="year">2024</span>
+                    <h4>50,000+ users &amp; global recognition</h4>
+                    <p>Stackly was named one of the top FinTech innovators and surpassed 50,000 active users worldwide.</p>
+                    <span class="tag">Milestone</span>
+                </div>
+
+                <div class="milestone-item" data-delay="0.5">
+                    <span class="year">2025</span>
+                    <h4>Platform evolution &amp; next chapter</h4>
+                    <p>Continuing to push boundaries with new features, deeper integrations, and a commitment to
+                        excellence.</p>
+                    <span class="tag">Ongoing</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    CTA — CENTERED
+    ============================================================ -->
+    <section class="cta-section" id="cta">
+        <div class="container">
+            <h2>
+                Ready to <span>transform</span><br />
+                your finance stack?
+            </h2>
+            <p>Join thousands of forward‑thinking teams who are already using Stackly to power their financial future.</p>
+            <a href="404.html" class="btn-primary">
+                <span>Start Free Trial</span>
+                <span>→</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    FOOTER — Glass-morphism
+    ============================================================ -->
+    <footer class="footer-glass">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand-section">
+                    <a href="index.html" class="logo">
+                        <img src="logo.webp" alt="Stackly" loading="lazy" />
+                    </a>
+                    <p class="footer-description">
+                        Building beautiful and functional financial experiences with modern technologies. We help
+                        businesses create their digital finance future.
+                    </p>
+                    <div class="footer-social-links">
+                        <a href="404.html" aria-label="Facebook">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                            </svg>
+                        </a>
+                        <a href="404.html" aria-label="Instagram">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                            </svg>
+                        </a>
+                        <a href="404.html" aria-label="Twitter">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                            </svg>
+                        </a>
+                        <a href="404.html" aria-label="GitHub">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.123-.3-.535-1.52.117-3.16 0 0 1.008-.322 3.3 1.23.96-.267 1.98-.399 3-.399s2.04.132 3 .399c2.292-1.552 3.3-1.23 3.3-1.23.653 1.64.24 2.86.118 3.16.768.84 1.233 1.91 1.233 3.22 0 4.61-2.804 5.62-5.476 5.92.43.37.824 1.102.824 2.22 0 1.602-.015 2.894-.015 3.287 0 .322.216.694.825.577C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                            </svg>
+                        </a>
+                        <a href="404.html" aria-label="Dribbble">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 24C5.385 24 0 18.615 0 12S5.385 0 12 0s12 5.385 12 12-5.385 12-12 12zm10.12-10.358c-.35-.11-3.17-.953-6.384-.438 1.34 3.684 1.887 6.684 1.992 7.308a10.174 10.174 0 004.395-6.87zm-6.115 7.808c-.153-.9-.75-4.032-2.19-7.77l-.066.02c-5.79 2.015-7.86 6.025-8.04 6.4a10.143 10.143 0 006.29 2.166c1.42 0 2.77-.29 4.006-.816zM4.67 16.6c.3-.51 3.075-5.09 8.19-6.78l.015-.03c-.3-.66-1.23-2.58-2.19-3.99C6.27 7.63 2.39 10.78 2.39 10.78l-.01.01c-.04.39-.06.8-.06 1.22 0 1.76.51 3.41 1.39 4.82zm13.09-9.55c-2.44 1.83-5.04 2.77-5.16 2.82.87 1.56 1.65 3.14 2.22 4.74 2.73-.87 5.19-.7 6.08-.57.04-.42.07-.85.07-1.28 0-2.02-.68-3.88-1.8-5.44-.03.04-.11.1-.41.25-.01.01-.03.01-.04.02l.04-.02zm-5.64 3.45c-.03-.06-.06-.12-.09-.18-.5-1.01-1.04-2.02-1.62-3.03-.96.48-3.18 1.74-4.95 4.08 1.65-.66 3.68-1.38 6.66-.87z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-columns">
+                    <div class="footer-column">
+                        <h4>About Us</h4>
+                        <ul>
+                            <li><a href="404.html">Company History</a></li>
+                            <li><a href="404.html">Meet the Team</a></li>
+                            <li><a href="404.html">Employee Handbook</a></li>
+                            <li><a href="404.html">Careers</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Our Services</h4>
+                        <ul>
+                            <li><a href="404.html">Web Development</a></li>
+                            <li><a href="404.html">Web Design</a></li>
+                            <li><a href="404.html">Marketing</a></li>
+                            <li><a href="404.html">Google Ads</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Helpful Links</h4>
+                        <ul>
+                            <li><a href="404.html">FAQs</a></li>
+                            <li><a href="404.html">Support</a></li>
+                            <li><a href="404.html" style="display:inline-flex;align-items:center;gap:6px;">
+                                    Live Chat
+                                    <span style="display:inline-flex;position:relative;width:10px;height:10px;">
+                                        <span
+                                            style="position:absolute;inset:0;border-radius:50%;background:var(--pink);opacity:0.75;animation:pulse-dot 2s ease-in-out infinite;"></span>
+                                        <span
+                                            style="position:absolute;inset:2px;border-radius:50%;background:var(--pink);"></span>
+                                    </span>
+                                </a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Contact Us</h4>
+                        <ul>
+                            <li>
+                                <a href="404.html" class="contact-item">
+                                    <svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6ZM20 6L12 11L4 6H20ZM20 18H4V8L12 13L20 8V18Z" />
+                                    </svg>
+                                    hello@stackly.com
+                                </a>
+                            </li>
+                            <li>
+                                <a href="404.html" class="contact-item">
+                                    <svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                                    </svg>
+                                    +1 (555) 123-4567
+                                </a>
+                            </li>
+                            <li>
+                                <a href="404.html" class="contact-item">
+                                    <svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                                    </svg>
+                                    <address>San Francisco, CA</address>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Stackly. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="404.html">Privacy</a>
+                    <a href="404.html">Terms</a>
+                    <a href="404.html">Security</a>
+                    <a href="404.html">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
+    <script>
+        // ============================================================
+        // THREE.JS BACKGROUND (global particle system)
+        // ============================================================
+        (function initThreeBackground() {
+            const canvas = document.getElementById('three-canvas');
+            if (!canvas) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({
+                canvas,
+                alpha: true,
+                antialias: true,
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const particlesGeometry = new THREE.BufferGeometry();
+            const count = 350;
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+
+            const palette = [
+                new THREE.Color('#e84393'),
+                new THREE.Color('#00b4d8'),
+                new THREE.Color('#4361ee'),
+                new THREE.Color('#ff7eb3'),
+                new THREE.Color('#48cae4'),
+            ];
+
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 20;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+                const c = palette[Math.floor(Math.random() * palette.length)];
+                colors[i * 3] = c.r;
+                colors[i * 3 + 1] = c.g;
+                colors[i * 3 + 2] = c.b;
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.07,
+                transparent: true,
+                opacity: 0.5,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true,
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+            camera.position.z = 8;
+
+            let mouseX = 0,
+                mouseY = 0;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            function animateBackground() {
+                requestAnimationFrame(animateBackground);
+                particlesMesh.rotation.x += 0.0003;
+                particlesMesh.rotation.y += 0.0005;
+                particlesMesh.rotation.x += (mouseY * 0.01 - particlesMesh.rotation.x) * 0.02;
+                particlesMesh.rotation.y += (mouseX * 0.01 - particlesMesh.rotation.y) * 0.02;
+                renderer.render(scene, camera);
+            }
+            animateBackground();
+        })();
+
+        // ============================================================
+        // GSAP — All Animations
+        // ============================================================
+        (function initGSAP() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // ── HERO ──
+            const heroBadge = document.getElementById('heroBadge');
+            const heroDesc = document.getElementById('heroDesc');
+
+            const heroTL = gsap.timeline({ defaults: { ease: 'power3.out' } });
+            heroTL
+                .to(heroBadge, { opacity: 1, y: 0, duration: 0.6 })
+                .to(heroDesc, { opacity: 1, y: 0, duration: 0.6 }, '-=0.2');
+
+            // ── MISSION SECTION ──
+            const missionLabel = document.getElementById('missionLabel');
+            const missionTitle = document.getElementById('missionTitle');
+            const missionSub = document.getElementById('missionSub');
+
+            gsap.fromTo(missionLabel, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: missionLabel, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+            gsap.fromTo(missionTitle, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                delay: 0.1,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: missionTitle, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+            gsap.fromTo(missionSub, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                delay: 0.15,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: missionSub, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+
+            // Mission text
+            const missionText1 = document.getElementById('missionText1');
+            const missionText2 = document.getElementById('missionText2');
+            const missionHighlight = document.getElementById('missionHighlight');
+
+            gsap.fromTo(missionText1, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                delay: 0.1,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: missionText1, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+            gsap.fromTo(missionText2, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                delay: 0.15,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: missionText2, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+            gsap.fromTo(missionHighlight, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                delay: 0.2,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: missionHighlight, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+
+            // Value cards
+            document.querySelectorAll('.value-card').forEach((card) => {
+                const delay = parseFloat(card.dataset.delay) || 0;
+                gsap.fromTo(card, { opacity: 0, y: 20 }, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.6,
+                    delay: 0.2 + delay,
+                    ease: 'power3.out',
+                    scrollTrigger: { trigger: card, start: 'top 90%', toggleActions: 'play none none none' },
+                });
+            });
+
+            // ── STATS INLINE ──
+            const statItems = document.querySelectorAll('.stats-inline .stat-item');
+            statItems.forEach((item) => {
+                const delay = parseFloat(item.dataset.delay) || 0;
+                gsap.fromTo(item, { opacity: 0, y: 30 }, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.7,
+                    delay: 0.2 + delay,
+                    ease: 'power3.out',
+                    scrollTrigger: { trigger: item, start: 'top 90%', toggleActions: 'play none none none' },
+                });
+            });
+
+            const stats = [
+                { id: 'stat1', target: 18470, suffix: 'k' },
+                { id: 'stat2', target: 2840000, suffix: '' },
+                { id: 'stat3', target: 54, suffix: '' },
+                { id: 'stat4', target: 99.99, suffix: '%' },
+            ];
+
+            stats.forEach((s) => {
+                const el = document.getElementById(s.id);
+                if (!el) return;
+                const item = el.closest('.stat-item');
+                if (!item) return;
+                ScrollTrigger.create({
+                    trigger: item,
+                    start: 'top 85%',
+                    onEnter: () => {
+                        let obj = { val: 0 };
+                        gsap.to(obj, {
+                            val: s.target,
+                            duration: 2.2,
+                            ease: 'power2.out',
+                            onUpdate: () => {
+                                let val = Math.round(obj.val);
+                                if (s.suffix === 'k') {
+                                    el.textContent = (val / 1000).toFixed(1) + 'k';
+                                } else if (s.suffix === '%') {
+                                    el.textContent = val + '%';
+                                } else {
+                                    el.textContent = val.toLocaleString();
+                                }
+                            },
+                        });
+                    },
+                    once: true,
+                });
+            });
+
+            // ── TEAM SECTION ──
+            const teamLabel = document.getElementById('teamLabel');
+            const teamTitle = document.getElementById('teamTitle');
+            const teamSub = document.getElementById('teamSub');
+
+            gsap.fromTo(teamLabel, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: teamLabel, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+            gsap.fromTo(teamTitle, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                delay: 0.1,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: teamTitle, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+            gsap.fromTo(teamSub, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                delay: 0.15,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: teamSub, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+
+            document.querySelectorAll('.team-card').forEach((card) => {
+                const delay = parseFloat(card.dataset.delay) || 0;
+                gsap.fromTo(card, { opacity: 0, y: 30 }, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.7,
+                    delay: 0.2 + delay,
+                    ease: 'power3.out',
+                    scrollTrigger: { trigger: card, start: 'top 90%', toggleActions: 'play none none none' },
+                });
+            });
+
+            // ── TIMELINE SECTION ──
+            const timelineLabel = document.getElementById('timelineLabel');
+            const timelineTitle = document.getElementById('timelineTitle');
+            const timelineSub = document.getElementById('timelineSub');
+
+            gsap.fromTo(timelineLabel, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: timelineLabel, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+            gsap.fromTo(timelineTitle, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                delay: 0.1,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: timelineTitle, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+            gsap.fromTo(timelineSub, { opacity: 0, y: 20 }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                delay: 0.15,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: timelineSub, start: 'top 88%', toggleActions: 'play none none none' },
+            });
+
+            document.querySelectorAll('.milestone-item').forEach((item) => {
+                const delay = parseFloat(item.dataset.delay) || 0;
+                gsap.fromTo(item, { opacity: 0, x: -20 }, {
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.7,
+                    delay: 0.2 + delay,
+                    ease: 'power3.out',
+                    scrollTrigger: { trigger: item, start: 'top 90%', toggleActions: 'play none none none' },
+                });
+            });
+
+            // ── CTA ──
+            const cta = document.getElementById('cta');
+            gsap.fromTo(cta, { opacity: 0, y: 50 }, {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: cta, start: 'top 85%', toggleActions: 'play none none none' },
+            });
+
+            // ── NAVBAR ──
+            const navbar = document.getElementById('navbar');
+            ScrollTrigger.create({
+                trigger: document.body,
+                start: 'top top',
+                end: 'bottom bottom',
+                onUpdate: (self) => {
+                    const progress = self.progress;
+                    const tiltX = (progress - 0.5) * 2;
+                    navbar.style.transform = `rotateX(${tiltX * 0.3}deg)`;
+                },
+            });
+
+            window.addEventListener('scroll', () => {
+                navbar.classList.toggle('scrolled', window.scrollY > 40);
+            });
+
+            ScrollTrigger.refresh();
+
+            // ── MOBILE NAV ──
+            const hamburger = document.getElementById('hamburgerToggle');
+            const mobileNav = document.getElementById('mobileNav');
+            const overlay = document.getElementById('mobileOverlay');
+
+            function openMobileNav() {
+                mobileNav.classList.add('open');
+                overlay.classList.add('active');
+                hamburger.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMobileNav() {
+                mobileNav.classList.remove('open');
+                overlay.classList.remove('active');
+                hamburger.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            if (hamburger) {
+                hamburger.addEventListener('click', () => {
+                    mobileNav.classList.contains('open') ? closeMobileNav() : openMobileNav();
+                });
+            }
+            if (overlay) overlay.addEventListener('click', closeMobileNav);
+
+            document.querySelectorAll('.mobile-nav a').forEach(link => {
+                link.addEventListener('click', closeMobileNav);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && mobileNav && mobileNav.classList.contains('open')) closeMobileNav();
+            });
+
+            // ── SMOOTH SCROLL ──
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    const target = document.querySelector(targetId);
+                    if (target) {
+                        e.preventDefault();
+                        const top = target.getBoundingClientRect().top + window.pageYOffset - 80;
+                        window.scrollTo({ top, behavior: 'smooth' });
+                    }
+                });
+            });
+
+            console.log('✦ Stackly — About Page Initialized');
+        })();
+    </script>
+
+</body>
+
+</html>

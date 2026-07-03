@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login — Stackly</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+        rel="stylesheet" />
+
+    <!-- Three.js (background) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
+
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --pink: #e84393;
+            --pink-light: #ff7eb3;
+            --pink-dark: #c2186b;
+            --pink-glow: rgba(232, 67, 147, 0.15);
+
+            --cyan: #00b4d8;
+            --cyan-light: #48cae4;
+            --cyan-dark: #0077b6;
+            --cyan-glow: rgba(0, 180, 216, 0.15);
+
+            --blue: #4361ee;
+            --blue-light: #6c8cff;
+            --blue-dark: #2a3fa8;
+
+            --bg-primary: #f5f0ff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --text-muted: #8a8aaa;
+
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            font-family: var(--font-body);
+        }
+
+        input {
+            font-family: var(--font-body);
+            cursor: text !important;
+            user-select: text !important;
+        }
+
+        /* ============================================================
+           THREE.JS BACKGROUND
+           ============================================================ */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* ============================================================
+           LOGIN CARD — Glass-morphism
+           ============================================================ */
+        .login-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 440px;
+            margin: 0 auto;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            border: 1px solid rgba(232, 67, 147, 0.06);
+            border-radius: 28px 0px 28px 0px;
+            padding: 44px 36px 40px;
+            box-shadow: 0 20px 80px rgba(67, 97, 238, 0.06), 0 4px 24px rgba(67, 97, 238, 0.04);
+            transition: all 0.4s ease;
+        }
+
+        .login-card:hover {
+            box-shadow: 0 32px 100px rgba(67, 97, 238, 0.08);
+        }
+
+        /* ── Logo ── */
+        .login-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .login-logo img {
+            height: 56px;
+            width: auto;
+            display: block;
+            border-radius: 10px;
+            filter: brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(900%) hue-rotate(315deg) brightness(105%) contrast(105%);
+        }
+
+        .login-logo .brand-text {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Title ── */
+        .login-title {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .login-title h1 {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .login-title p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        /* ── Form ── */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.02em;
+        }
+
+        .form-group label .required {
+            color: var(--pink);
+            margin-left: 2px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px 0px 12px 0px;
+            border: 1px solid rgba(232, 67, 147, 0.06);
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--pink);
+            box-shadow: 0 0 0 4px rgba(232, 67, 147, 0.04);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* ── Custom Dropdown (Role) ── */
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .custom-dropdown .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-radius: 12px 0px 12px 0px;
+            border: 1px solid rgba(232, 67, 147, 0.06);
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            min-height: 54px;
+        }
+
+        .custom-dropdown .dropdown-trigger:hover {
+            border-color: rgba(232, 67, 147, 0.15);
+        }
+
+        .custom-dropdown .dropdown-trigger .arrow {
+            transition: transform 0.3s ease;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .custom-dropdown.active .dropdown-trigger .arrow {
+            transform: rotate(180deg);
+        }
+
+        .custom-dropdown .dropdown-trigger .selected-text {
+            color: var(--text-primary);
+        }
+
+        .custom-dropdown .dropdown-trigger .placeholder-text {
+            color: var(--text-muted);
+        }
+
+        .custom-dropdown .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(232, 67, 147, 0.06);
+            border-radius: 12px 0px 12px 0px;
+            box-shadow: 0 16px 48px rgba(67, 97, 238, 0.08);
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+                opacity 0.3s ease,
+                transform 0.3s ease;
+            transform: translateY(-8px);
+            z-index: 100;
+        }
+
+        .custom-dropdown.active .dropdown-menu {
+            max-height: 200px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .custom-dropdown .dropdown-item {
+            padding: 12px 18px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(232, 67, 147, 0.03);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .custom-dropdown .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .custom-dropdown .dropdown-item:hover {
+            background: rgba(232, 67, 147, 0.04);
+            color: var(--text-primary);
+        }
+
+        .custom-dropdown .dropdown-item .icon {
+            font-size: 1rem;
+        }
+
+        .custom-dropdown .dropdown-item.selected {
+            background: rgba(232, 67, 147, 0.06);
+            color: var(--pink);
+            font-weight: 500;
+        }
+
+        /* ── Submit Button ── */
+        .btn-signin {
+            width: 100%;
+            padding: 16px 32px;
+            border-radius: 14px 0px 14px 0px;
+            background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 32px rgba(232, 67, 147, 0.20);
+            position: relative;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .btn-signin::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--cyan), var(--pink));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            border-radius: 14px 0px 14px 0px;
+        }
+
+        .btn-signin:hover::before {
+            opacity: 1;
+        }
+
+        .btn-signin span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-signin:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 12px 48px rgba(232, 67, 147, 0.30);
+        }
+
+        .btn-signin:active {
+            transform: scale(0.97);
+        }
+
+        /* ── Links Row ── */
+        .login-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            font-size: 0.85rem;
+        }
+
+        .login-links a {
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .login-links a:hover {
+            color: var(--pink);
+        }
+
+        /* ── Social Login ── */
+        .social-login {
+            display: flex;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .social-login .social-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 12px 0px 12px 0px;
+            border: 1px solid rgba(232, 67, 147, 0.06);
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(4px);
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .social-login .social-btn:hover {
+            background: rgba(255, 255, 255, 0.7);
+            border-color: rgba(232, 67, 147, 0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(67, 97, 238, 0.04);
+        }
+
+        .social-login .social-btn .icon {
+            font-size: 1.2rem;
+        }
+
+        /* ── Divider ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 18px 0 6px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(232, 67, 147, 0.06);
+        }
+
+        .divider span {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── Sign Up Link ── */
+        .signup-row {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .signup-row a {
+            color: var(--pink);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .signup-row a:hover {
+            color: var(--pink-dark);
+            text-decoration: underline;
+        }
+
+        /* ── Footer note ── */
+        .login-footer-note {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 32px 20px 28px;
+                border-radius: 20px 0px 20px 0px;
+            }
+
+            .login-logo {
+                font-size: 1.3rem;
+            }
+
+            .login-logo img {
+                height: 44px;
+            }
+
+            .login-title h1 {
+                font-size: 1.4rem;
+            }
+
+            .social-login {
+                flex-direction: column;
+            }
+
+            .login-links {
+                flex-direction: column;
+                gap: 6px;
+                align-items: flex-start;
+            }
+
+            .custom-dropdown .dropdown-trigger {
+                padding: 12px 14px;
+                min-height: 48px;
+                font-size: 0.9rem;
+            }
+
+            .form-group input {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+            }
+
+            .btn-signin {
+                padding: 14px 24px;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .login-card {
+                padding: 24px 16px 20px;
+            }
+
+            .login-logo img {
+                height: 36px;
+            }
+
+            .login-logo {
+                font-size: 1.1rem;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============================================================
+    THREE.JS BACKGROUND
+    ============================================================ -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- ============================================================
+    LOGIN CARD
+    ============================================================ -->
+    <div class="login-wrapper">
+        <div class="login-card">
+
+            <!-- Logo -->
+            <div class="login-logo">
+                <img src="logo.webp" alt="Stackly" loading="lazy" />
+            </div>
+
+            <!-- Title -->
+            <div class="login-title">
+                <h1>Welcome back</h1>
+                <p>Sign in to your account</p>
+            </div>
+
+            <!-- Form -->
+            <form class="login-form" id="loginForm" action="javascript:void(0)">
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="emailInput">Email Address <span class="required">*</span></label>
+                    <input type="email" id="emailInput" placeholder="you@example.com" />
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="passwordInput">Password <span class="required">*</span></label>
+                    <input type="password" id="passwordInput" placeholder="••••••••" />
+                </div>
+
+                <!-- Role — Custom Dropdown -->
+                <div class="form-group">
+                    <label>Role <span class="required">*</span></label>
+                    <div class="custom-dropdown" id="roleDropdown">
+                        <div class="dropdown-trigger" id="dropdownTrigger">
+                            <span class="placeholder-text" id="selectedRoleText">Select a role</span>
+                            <span class="arrow">▾</span>
+                        </div>
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <div class="dropdown-item" data-value="admin">
+                                <span class="icon">🛡️</span> Admin
+                            </div>
+                            <div class="dropdown-item" data-value="user">
+                                <span class="icon">👤</span> User
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sign In -->
+                <button type="submit" class="btn-signin" id="signInBtn">
+                    <span>Sign In</span>
+                </button>
+
+                <!-- Forgot Password -->
+                <div class="login-links">
+                    <a href="404.html">🔑 Forgot password?</a>
+                </div>
+            </form>
+
+            <!-- Divider -->
+            <div class="divider">
+                <span>or continue with</span>
+            </div>
+
+            <!-- Social Login -->
+            <div class="social-login">
+                <a href="404.html" class="social-btn">
+                    <span class="icon">🅖</span> Google
+                </a>
+                <a href="404.html" class="social-btn">
+                    <span class="icon">𝕏</span> Twitter
+                </a>
+            </div>
+
+            <!-- Sign Up -->
+            <div class="signup-row">
+                Don't have an account? <a href="signup.html">Create one →</a>
+            </div>
+
+            <div class="login-footer-note">
+                Secure · Encrypted · 🔒
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
+
+    <!-- Three.js Background -->
+    <script>
+        (function initThreeBackground() {
+            const canvas = document.getElementById('three-canvas');
+            if (!canvas) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({
+                canvas,
+                alpha: true,
+                antialias: true,
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const particlesGeometry = new THREE.BufferGeometry();
+            const count = 280;
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+
+            const palette = [
+                new THREE.Color('#e84393'),
+                new THREE.Color('#00b4d8'),
+                new THREE.Color('#4361ee'),
+                new THREE.Color('#ff7eb3'),
+                new THREE.Color('#48cae4'),
+            ];
+
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 16;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 16;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 16;
+                const c = palette[Math.floor(Math.random() * palette.length)];
+                colors[i * 3] = c.r;
+                colors[i * 3 + 1] = c.g;
+                colors[i * 3 + 2] = c.b;
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.06,
+                transparent: true,
+                opacity: 0.45,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true,
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+            camera.position.z = 7;
+
+            let mouseX = 0,
+                mouseY = 0;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            function animateBackground() {
+                requestAnimationFrame(animateBackground);
+                particlesMesh.rotation.x += 0.0002;
+                particlesMesh.rotation.y += 0.0004;
+                particlesMesh.rotation.x += (mouseY * 0.008 - particlesMesh.rotation.x) * 0.02;
+                particlesMesh.rotation.y += (mouseX * 0.008 - particlesMesh.rotation.y) * 0.02;
+                renderer.render(scene, camera);
+            }
+            animateBackground();
+        })();
+    </script>
+
+    <!-- Custom Dropdown + Login Logic -->
+    <script>
+        (function initLogin() {
+            const dropdown = document.getElementById('roleDropdown');
+            const trigger = document.getElementById('dropdownTrigger');
+            const menu = document.getElementById('dropdownMenu');
+            const selectedText = document.getElementById('selectedRoleText');
+            const items = menu.querySelectorAll('.dropdown-item');
+            const emailInput = document.getElementById('emailInput');
+            const signInBtn = document.getElementById('signInBtn');
+
+            let selectedRole = null;
+
+            // ── Toggle dropdown ──
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('active');
+            });
+
+            // ── Select item ──
+            items.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const value = this.dataset.value;
+                    const label = this.textContent.trim();
+
+                    // Update selected text
+                    selectedText.textContent = label;
+                    selectedText.style.color = 'var(--text-primary)';
+                    selectedRole = value;
+
+                    // Remove selected class from all
+                    items.forEach(i => i.classList.remove('selected'));
+                    this.classList.add('selected');
+
+                    // Close dropdown
+                    dropdown.classList.remove('active');
+                });
+            });
+
+            // ── Close dropdown on outside click ──
+            document.addEventListener('click', function() {
+                dropdown.classList.remove('active');
+            });
+
+            // ── Prevent closing when clicking inside menu ──
+            menu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // ── Sign In logic ──
+            signInBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const email = emailInput.value.trim();
+                const role = selectedRole;
+
+                // If no role selected, default to 'user'
+                const finalRole = role || 'user';
+
+                // Store email and role in localStorage
+                localStorage.setItem('stackly_user_email', email || 'guest');
+                localStorage.setItem('stackly_user_role', finalRole);
+
+                // Redirect based on role
+                if (finalRole === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'user.html';
+                }
+            });
+
+            // ── Enter key support ──
+            document.getElementById('loginForm').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    signInBtn.click();
+                }
+            });
+
+            // ── Pre-select a default role (User) for demo ──
+            const defaultRole = 'user';
+            const defaultItem = Array.from(items).find(el => el.dataset.value === defaultRole);
+            if (defaultItem) {
+                defaultItem.click();
+            }
+
+            console.log('✦ Stackly — Login Page Initialized');
+        })();
+    </script>
+
+</body>
+
+</html>

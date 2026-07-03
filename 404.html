@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 — Page Not Found | Stackly</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+        rel="stylesheet" />
+
+    <!-- Three.js (background) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
+
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --pink: #e84393;
+            --pink-light: #ff7eb3;
+            --pink-dark: #c2186b;
+            --pink-glow: rgba(232, 67, 147, 0.15);
+
+            --cyan: #00b4d8;
+            --cyan-light: #48cae4;
+            --cyan-dark: #0077b6;
+            --cyan-glow: rgba(0, 180, 216, 0.15);
+
+            --blue: #4361ee;
+            --blue-light: #6c8cff;
+            --blue-dark: #2a3fa8;
+
+            --bg-primary: #f5f0ff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --text-muted: #8a8aaa;
+
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            font-family: var(--font-body);
+        }
+
+        /* ============================================================
+           THREE.JS BACKGROUND
+           ============================================================ */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* ============================================================
+           404 CARD — Glass-morphism
+           ============================================================ */
+        .error-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .error-card {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            border: 1px solid rgba(232, 67, 147, 0.06);
+            border-radius: 28px 0px 28px 0px;
+            padding: 48px 36px 44px;
+            box-shadow: 0 20px 80px rgba(67, 97, 238, 0.06), 0 4px 24px rgba(67, 97, 238, 0.04);
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .error-card:hover {
+            box-shadow: 0 32px 100px rgba(67, 97, 238, 0.08);
+        }
+
+        /* ── Logo ── */
+        .error-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .error-logo img {
+            height: 56px;
+            width: auto;
+            display: block;
+            border-radius: 10px;
+            filter: brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(900%) hue-rotate(315deg) brightness(105%) contrast(105%);
+        }
+
+        .error-logo .brand-text {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Error Code ── */
+        .error-code {
+            font-family: var(--font-heading);
+            font-size: 6rem;
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--pink), var(--cyan), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── Title ── */
+        .error-title {
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        /* ── Description ── */
+        .error-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 340px;
+            margin: 0 auto 28px;
+        }
+
+        /* ── Home Button ── */
+        .btn-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 40px;
+            border-radius: 14px 0px 14px 0px;
+            background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 32px rgba(232, 67, 147, 0.20);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-home::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--cyan), var(--pink));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            border-radius: 14px 0px 14px 0px;
+        }
+
+        .btn-home:hover::before {
+            opacity: 1;
+        }
+
+        .btn-home span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-home:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 48px rgba(232, 67, 147, 0.30);
+        }
+
+        .btn-home:active {
+            transform: scale(0.97);
+        }
+
+        /* ── Footer note ── */
+        .error-footer-note {
+            margin-top: 28px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+        }
+
+        /* ── Decorative floating shapes ── */
+        .error-deco {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .error-deco span {
+            display: block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--pink);
+            opacity: 0.15;
+            animation: floatPulse 3s ease-in-out infinite;
+        }
+
+        .error-deco span:nth-child(2) {
+            background: var(--cyan);
+            animation-delay: 0.6s;
+        }
+
+        .error-deco span:nth-child(3) {
+            background: var(--blue);
+            animation-delay: 1.2s;
+        }
+
+        @keyframes floatPulse {
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 0.15;
+            }
+            50% {
+                transform: translateY(-8px) scale(1.2);
+                opacity: 0.3;
+            }
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 480px) {
+            .error-card {
+                padding: 32px 20px 28px;
+                border-radius: 20px 0px 20px 0px;
+            }
+
+            .error-logo {
+                font-size: 1.3rem;
+            }
+
+            .error-logo img {
+                height: 44px;
+            }
+
+            .error-code {
+                font-size: 4.4rem;
+            }
+
+            .error-title {
+                font-size: 1.3rem;
+            }
+
+            .error-desc {
+                font-size: 0.9rem;
+            }
+
+            .btn-home {
+                padding: 14px 28px;
+                font-size: 0.9rem;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .error-deco span {
+                width: 8px;
+                height: 8px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .error-card {
+                padding: 24px 16px 20px;
+            }
+
+            .error-logo img {
+                height: 36px;
+            }
+
+            .error-logo {
+                font-size: 1.1rem;
+                gap: 8px;
+            }
+
+            .error-code {
+                font-size: 3.6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============================================================
+    THREE.JS BACKGROUND
+    ============================================================ -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- ============================================================
+    404 CARD
+    ============================================================ -->
+    <div class="error-wrapper">
+        <div class="error-card">
+
+            <!-- Logo -->
+            <div class="error-logo">
+                <img src="logo.webp" alt="Stackly" loading="lazy" />
+            </div>
+
+            <!-- Decorative dots -->
+            <div class="error-deco">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <!-- Error Code -->
+            <div class="error-code">404</div>
+
+            <!-- Title -->
+            <h1 class="error-title">Page not found</h1>
+
+            <!-- Description -->
+            <p class="error-desc">
+                Oops! The page you're looking for seems to have wandered off.
+                Let's get you back on track.
+            </p>
+
+            <!-- Home Button -->
+            <a href="index.html" class="btn-home">
+                <span>🏠 Go Home</span>
+                <span>→</span>
+            </a>
+
+            <div class="error-footer-note">
+                Stackly · Smart Finance
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
+
+    <!-- Three.js Background -->
+    <script>
+        (function initThreeBackground() {
+            const canvas = document.getElementById('three-canvas');
+            if (!canvas) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({
+                canvas,
+                alpha: true,
+                antialias: true,
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const particlesGeometry = new THREE.BufferGeometry();
+            const count = 280;
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+
+            const palette = [
+                new THREE.Color('#e84393'),
+                new THREE.Color('#00b4d8'),
+                new THREE.Color('#4361ee'),
+                new THREE.Color('#ff7eb3'),
+                new THREE.Color('#48cae4'),
+            ];
+
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 16;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 16;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 16;
+                const c = palette[Math.floor(Math.random() * palette.length)];
+                colors[i * 3] = c.r;
+                colors[i * 3 + 1] = c.g;
+                colors[i * 3 + 2] = c.b;
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.06,
+                transparent: true,
+                opacity: 0.45,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true,
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+            camera.position.z = 7;
+
+            let mouseX = 0,
+                mouseY = 0;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            function animateBackground() {
+                requestAnimationFrame(animateBackground);
+                particlesMesh.rotation.x += 0.0002;
+                particlesMesh.rotation.y += 0.0004;
+                particlesMesh.rotation.x += (mouseY * 0.008 - particlesMesh.rotation.x) * 0.02;
+                particlesMesh.rotation.y += (mouseX * 0.008 - particlesMesh.rotation.y) * 0.02;
+                renderer.render(scene, camera);
+            }
+            animateBackground();
+        })();
+    </script>
+
+</body>
+
+</html>

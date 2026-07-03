@@ -1,0 +1,3713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stackly — Smart Finance</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+        rel="stylesheet" />
+
+    <!-- GSAP + Plugins -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js">
+    </script>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
+
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            cursor: default;
+        }
+
+        :root {
+            --pink: #e84393;
+            --pink-light: #ff7eb3;
+            --pink-dark: #c2186b;
+            --pink-glow: rgba(232, 67, 147, 0.15);
+
+            --cyan: #00b4d8;
+            --cyan-light: #48cae4;
+            --cyan-dark: #0077b6;
+            --cyan-glow: rgba(0, 180, 216, 0.15);
+
+            --blue: #4361ee;
+            --blue-light: #6c8cff;
+            --blue-dark: #2a3fa8;
+            --blue-glow: rgba(67, 97, 238, 0.12);
+
+            --bg-primary: #f5f0ff;
+            --bg-secondary: #ffffff;
+            --bg-elevated: #faf7ff;
+            --bg-card: rgba(255, 255, 255, 0.6);
+
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --text-muted: #8a8aaa;
+
+            --border-glass: rgba(232, 67, 147, 0.08);
+            --shadow-glass: 0 8px 32px rgba(67, 97, 238, 0.06);
+            --shadow-hover: 0 32px 80px rgba(67, 97, 238, 0.10);
+
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 10px;
+            --transition: 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            cursor: default;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            font-family: var(--font-body);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        p,
+        h1,
+        h2,
+        h3,
+        h4,
+        .stat-number,
+        .stat-label,
+        .feature-desc,
+        .step-text,
+        .testimonial-text,
+        .footer-text {
+            user-select: text;
+            cursor: default;
+        }
+
+        a,
+        button,
+        .nav-link,
+        .cta-btn,
+        .feature-card,
+        .step-card,
+        .testimonial-card,
+        .footer-link,
+        .hamburger-toggle,
+        .logo,
+        .stat-card-landing {
+            cursor: pointer !important;
+        }
+
+        /* ============================================================
+           THREE.JS BACKGROUND (global)
+           ============================================================ */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* ============================================================
+           CURVY HEADER — SVG Wave
+           ============================================================ */
+        .hero-curve {
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            z-index: 3;
+            pointer-events: none;
+            line-height: 0;
+        }
+
+        .hero-curve svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* ============================================================
+           NAVBAR — GLASS WITH GRADIENT BG (ALWAYS)
+           ============================================================ */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 12px 0;
+            background: linear-gradient(135deg, rgba(232, 67, 147, 0.10), rgba(0, 180, 216, 0.10), rgba(67, 97, 238, 0.10));
+            backdrop-filter: blur(32px) saturate(220%);
+            -webkit-backdrop-filter: blur(32px) saturate(220%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.4s ease;
+            transform-style: preserve-3d;
+            perspective: 800px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+        }
+
+        .navbar.scrolled {
+            background: linear-gradient(135deg, rgba(232, 67, 147, 0.15), rgba(0, 180, 216, 0.15), rgba(67, 97, 238, 0.15));
+            backdrop-filter: blur(32px) saturate(220%);
+            -webkit-backdrop-filter: blur(32px) saturate(220%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.04);
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .logo img {
+            width: auto;
+            height: 70px;
+            display: block;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            transition: filter 0.3s ease, transform 0.3s ease;
+            filter: brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(900%) hue-rotate(315deg) brightness(105%) contrast(105%);
+        }
+
+        .logo img:hover {
+            filter: brightness(0) saturate(100%) invert(72%) sepia(50%) saturate(900%) hue-rotate(315deg) brightness(110%) contrast(110%);
+            transform: scale(1.04);
+        }
+
+        .logo .brand-text {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── NAV LINKS WITH GRADIENT HOVER EFFECT ── */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px 16px;
+            border-radius: 10px;
+            background: transparent;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 12px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--pink), var(--cyan), var(--blue));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2.5px;
+            background: linear-gradient(90deg, var(--pink), var(--cyan), var(--blue));
+            transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(232, 67, 147, 0.2);
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+            transform: translateY(-1px);
+        }
+
+        .nav-links a:hover::before {
+            opacity: 1;
+        }
+
+        .nav-links a:hover::after {
+            width: 60%;
+        }
+
+        .nav-links a:active {
+            transform: scale(0.97);
+        }
+
+        /* ── LOGIN BUTTON ── */
+        .nav-login {
+            padding: 10px 28px;
+            border-radius: 12px 0px 12px 0px;
+            background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 0.8rem !important;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 24px rgba(232, 67, 147, 0.20);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.04em;
+        }
+
+        .nav-login::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--cyan), var(--pink));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            border-radius: 12px 0px 12px 0px;
+        }
+
+        .nav-login:hover::before {
+            opacity: 1;
+        }
+
+        .nav-login span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-login::after {
+            display: none !important;
+        }
+
+        .nav-login:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 40px rgba(232, 67, 147, 0.30);
+            color: #fff !important;
+            background: transparent;
+        }
+
+        .nav-login:active {
+            transform: scale(0.97);
+        }
+
+        /* ── HAMBURGER ── */
+        .hamburger-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-toggle:hover {
+            background: rgba(255, 255, 255, 0.5);
+            border-color: rgba(232, 67, 147, 0.2);
+        }
+
+        .hamburger-toggle span {
+            display: block;
+            width: 28px;
+            height: 2.5px;
+            background: var(--text-primary);
+            border-radius: 4px;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-origin: center;
+        }
+
+        .hamburger-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger-toggle.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+
+        .hamburger-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* ── MOBILE NAV — FULL WIDTH ── */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 100%;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(40px) saturate(220%);
+            -webkit-backdrop-filter: blur(40px) saturate(220%);
+            padding: 100px 36px 40px;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 999;
+            transition: right 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            border-left: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: -8px 0 40px rgba(0, 0, 0, 0.06);
+            overflow-y: auto;
+        }
+
+        .mobile-nav.open {
+            right: 0;
+        }
+
+        .mobile-nav::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(232, 67, 147, 0.03), rgba(0, 180, 216, 0.03));
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .mobile-nav a {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(232, 67, 147, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .mobile-nav a::after {
+            content: '→';
+            margin-left: auto;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            color: var(--pink);
+        }
+
+        .mobile-nav a:hover {
+            color: var(--pink);
+            padding-left: 8px;
+        }
+
+        .mobile-nav a:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .mobile-nav .nav-cta-mobile {
+            margin-top: 20px;
+            padding: 16px 32px;
+            border-radius: 12px 0px 12px 0px;
+            background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+            color: #fff !important;
+            font-weight: 600;
+            text-align: center;
+            border: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-nav .nav-cta-mobile:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 32px rgba(232, 67, 147, 0.25);
+            padding-left: 32px;
+        }
+
+        .mobile-nav .nav-cta-mobile::after {
+            display: none;
+        }
+
+        .mobile-nav .mobile-nav-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            padding: 12px 0 4px;
+            font-weight: 600;
+        }
+
+        .mobile-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .mobile-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ============================================================
+           HERO — with curvy wave + Three.js
+           ============================================================ */
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 130px 0 80px;
+            overflow: hidden;
+            background: linear-gradient(160deg, #f5f0ff 0%, #e8e0f5 100%);
+        }
+
+        .hero .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--pink);
+            background: rgba(232, 67, 147, 0.06);
+            padding: 6px 18px;
+            border-radius: 100px;
+            border: 1px solid rgba(232, 67, 147, 0.06);
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .hero h1 {
+            font-family: var(--font-heading);
+            font-size: 4.2rem;
+            font-weight: 700;
+            line-height: 1.05;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero h1 .word {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(60px) rotateX(40deg);
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin-bottom: 32px;
+            line-height: 1.8;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .btn-primary {
+            padding: 16px 40px;
+            border-radius: 14px 0px 14px 0px;
+            background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 32px rgba(232, 67, 147, 0.20);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--cyan), var(--pink));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            border-radius: 14px 0px 14px 0px;
+        }
+
+        .btn-primary:hover::before {
+            opacity: 1;
+        }
+
+        .btn-primary span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 48px rgba(232, 67, 147, 0.30);
+        }
+
+        .btn-secondary {
+            padding: 16px 32px;
+            border-radius: 14px 0px 14px 0px;
+            border: 1px solid rgba(232, 67, 147, 0.12);
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.4s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(8px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(232, 67, 147, 0.20);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(67, 97, 238, 0.06);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 40px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(232, 67, 147, 0.06);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .hero-stat .number {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--pink);
+            display: block;
+        }
+
+        .hero-stat .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ── HERO THREE.JS VISUAL ── */
+        .hero-visual {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 520px;
+            margin: 0 auto;
+            border-radius: 32px;
+            overflow: hidden;
+            background: #0a0814;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: scale(0.92) translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .hero-visual.visible {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        .hero-visual canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+
+        .hero-visual-label {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            color: rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            padding: 6px 18px;
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        /* ============================================================
+           FEATURES — Orbital Layout (Desktop only)
+           ============================================================ */
+        .features {
+            position: relative;
+            z-index: 1;
+            padding: 100px 0 80px;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--pink);
+            background: rgba(232, 67, 147, 0.05);
+            padding: 4px 16px;
+            border-radius: 100px;
+            margin-bottom: 12px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .section-title span {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-sub {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 48px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* Orbit Container — Desktop only */
+        .orbit-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+            position: relative;
+            overflow: visible;
+        }
+
+        .orbit-wrapper {
+            position: relative;
+            width: 560px;
+            height: 560px;
+            margin: 0 auto;
+        }
+
+        /* Center Logo / Ball */
+        .orbit-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(232, 67, 147, 0.06);
+            box-shadow: 0 20px 60px rgba(67, 97, 238, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: var(--font-heading);
+            transition: all 0.4s ease;
+        }
+
+        .orbit-center img {
+            height: 50px;
+            width: auto;
+            margin-bottom: 4px;
+            filter: brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(900%) hue-rotate(315deg) brightness(105%) contrast(105%);
+        }
+
+        .orbit-center span {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+
+        /* Rotating Ring */
+        .orbit-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            will-change: transform;
+        }
+
+        /* Individual Cards — no margins, positioning via JS */
+        .orbit-card {
+            position: absolute;
+            width: 170px;
+            padding: 20px 16px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(232, 67, 147, 0.04);
+            border-radius: 24px 0px 24px 0px;
+            box-shadow: 0 8px 32px rgba(67, 97, 238, 0.06);
+            text-align: center;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+                opacity 0.4s ease,
+                filter 0.4s ease,
+                box-shadow 0.4s ease,
+                background 0.4s ease;
+            cursor: pointer;
+            will-change: transform, left, top, opacity;
+            transform-origin: center center;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            left: 0;
+            top: 0;
+        }
+
+        .orbit-card .icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .orbit-card h4 {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .orbit-card p {
+            font-size: 0.7rem;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Hover Effects — rotation continues, blur others, zoom current */
+        .orbit-card:not(:hover) {
+            opacity: 0.5;
+            filter: blur(2px);
+        }
+
+        .orbit-card:hover {
+            transform: scale(1.15) !important;
+            z-index: 20;
+            border-color: rgba(232, 67, 147, 0.15);
+            box-shadow: 0 20px 60px rgba(67, 97, 238, 0.15);
+            background: rgba(255, 255, 255, 0.85);
+            opacity: 1;
+            filter: blur(0px);
+        }
+
+        /* Responsive Orbit */
+        @media (max-width: 1024px) {
+            .orbit-wrapper {
+                width: 480px;
+                height: 480px;
+            }
+
+            .orbit-card {
+                width: 150px;
+                height: 180px;
+                padding: 16px 12px;
+            }
+
+            .orbit-card .icon {
+                font-size: 1.8rem;
+            }
+
+            .orbit-card h4 {
+                font-size: 0.9rem;
+            }
+
+            .orbit-card p {
+                font-size: 0.65rem;
+            }
+
+            .orbit-center {
+                width: 100px;
+                height: 100px;
+            }
+
+            .orbit-center img {
+                height: 40px;
+            }
+        }
+
+        /* Mobile: Hide orbital, show card stacking */
+        @media (max-width: 768px) {
+            .orbit-container {
+                display: none !important;
+            }
+
+            .features-mobile {
+                display: block !important;
+            }
+        }
+
+        /* Desktop: Show orbital, hide card stacking */
+        @media (min-width: 769px) {
+            .features-mobile {
+                display: none !important;
+            }
+        }
+
+        /* ============================================================
+           FEATURES — Mobile Card Stacking (GSAP)
+           ============================================================ */
+        .features-mobile {
+            display: none;
+            position: relative;
+            z-index: 1;
+            padding: 60px 0 40px;
+            overflow: hidden;
+            background: var(--bg-primary);
+        }
+
+        .features-mobile .cards-stack-mobile {
+            width: 100%;
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .features-mobile .card-wrapper-mobile {
+            width: 100%;
+            perspective: 500px;
+            margin-bottom: 30px;
+        }
+
+        .features-mobile .card-wrapper-mobile:last-child {
+            margin-bottom: 0;
+        }
+
+        .features-mobile .stack-card-mobile {
+            width: 100%;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 24px 0px 24px 0px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(232, 67, 147, 0.04);
+            box-shadow: 0 8px 32px rgba(67, 97, 238, 0.06);
+            padding: 30px 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            color: var(--text-primary);
+        }
+
+        .features-mobile .stack-card-mobile .icon {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .features-mobile .stack-card-mobile h4 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .features-mobile .stack-card-mobile p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            max-width: 400px;
+        }
+
+        .features-mobile .stack-card-mobile .card-tag {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 4px 16px;
+            border-radius: 100px;
+            background: rgba(232, 67, 147, 0.08);
+            color: var(--pink);
+            margin-top: 12px;
+        }
+
+        /* ============================================================
+           STATS BANNER
+           ============================================================ */
+        .stats-banner {
+            position: relative;
+            z-index: 1;
+            padding: 70px 0;
+            border-top: 1px solid rgba(232, 67, 147, 0.04);
+            border-bottom: 1px solid rgba(232, 67, 147, 0.04);
+            background: rgba(255, 255, 255, 0.4);
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stats-banner .container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .stat-item {
+            padding: 24px 16px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 20px 0px 20px 0px;
+            border: 1px solid rgba(232, 67, 147, 0.04);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-4px);
+            border-color: rgba(232, 67, 147, 0.08);
+            box-shadow: 0 12px 40px rgba(67, 97, 238, 0.06);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .stat-item .number {
+            font-family: var(--font-heading);
+            font-size: 3.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            line-height: 1.2;
+        }
+
+        .stat-item .label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        /* ============================================================
+           CARD STACKING SECTION (GSAP) — How It Works
+           ============================================================ */
+        .spacer,
+        .stack-wrapper {
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        .stack-wrapper {
+            padding-top: 100px;
+            padding-bottom: 50px;
+            border-top: dashed 2px rgba(232, 67, 147, 0.08);
+            border-bottom: dashed 2px rgba(232, 67, 147, 0.08);
+            background: var(--bg-primary);
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .stack-wrapper .section-label {
+            margin: 0 auto 12px;
+        }
+
+        .stack-wrapper .section-title,
+        .stack-wrapper .section-sub {
+            text-align: center;
+        }
+
+        .stack-wrapper .section-sub {
+            margin: 0 auto 48px;
+        }
+
+        .card-wrapper {
+            width: 100%;
+            perspective: 500px;
+            margin-bottom: 50px;
+        }
+
+        .card-wrapper:last-child {
+            margin-bottom: 0;
+        }
+
+        .cards-stack {
+            width: 100%;
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .stack-card {
+            width: 100%;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 24px 0px 24px 0px;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            padding: 40px;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stack-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
+            border-radius: 24px 0px 24px 0px;
+            z-index: 1;
+        }
+
+        .stack-card>* {
+            position: relative;
+            z-index: 2;
+        }
+
+        .stack-card h3 {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .stack-card p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 400px;
+            text-align: center;
+            line-height: 1.7;
+        }
+
+        .stack-card .card-tag {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 4px 16px;
+            border-radius: 100px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            margin-top: 16px;
+        }
+
+        .stack-card.one {
+            background-image: url("./assets/one.webp");
+        }
+
+        .stack-card.two {
+            background-image: url("./assets/three.webp");
+        }
+
+        .stack-card.three {
+            background-image: url("./assets/two.webp");
+        }
+
+        .stack-card.four {
+            background-image: url("./assets/four.webp");
+        }
+
+        @media (min-width: 768px) {
+            .cards-stack {
+                width: 80%;
+                padding: 0 30px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .cards-stack {
+                width: 70%;
+                padding: 0 50px;
+            }
+        }
+
+        /* ============================================================
+           CIRCULAR TESTIMONIALS
+           ============================================================ */
+        .circular-testimonials-section {
+            position: relative;
+            z-index: 1;
+            padding: 80px 0 100px;
+            border-top: 1px solid rgba(232, 67, 147, 0.04);
+            background: rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .circular-testimonials-section .section-label {
+            margin: 0 auto 12px;
+        }
+
+        .circular-testimonials-section .section-title,
+        .circular-testimonials-section .section-sub {
+            text-align: center;
+        }
+
+        .circular-testimonials-section .section-sub {
+            margin: 0 auto 48px;
+        }
+
+        .circular-container {
+            width: 100%;
+            max-width: 56rem;
+            padding: 2rem 0;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .circular-grid {
+            display: grid;
+            gap: 5rem;
+        }
+
+        .circular-images {
+            position: relative;
+            width: 100%;
+            height: 24rem;
+            perspective: 1000px;
+            overflow: visible;
+        }
+
+        .circular-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            transition: none;
+        }
+
+        .circular-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 260px;
+        }
+
+        .circular-name {
+            font-weight: 700;
+            font-family: var(--font-heading);
+            margin-bottom: 0.25rem;
+            color: #1a1a2e;
+            font-size: 1.5rem;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .circular-designation {
+            color: #6b7280;
+            font-size: 0.925rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .circular-quote {
+            color: #4b5563;
+            font-size: 1.125rem;
+            line-height: 1.75;
+            min-height: 100px;
+        }
+
+        .circular-quote .word {
+            display: inline-block;
+            opacity: 0;
+            filter: blur(10px);
+            transform: translateY(5px);
+        }
+
+        .circular-quote .word.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+            transition: opacity 0.22s ease-in-out, filter 0.22s ease-in-out, transform 0.22s ease-in-out;
+        }
+
+        .circular-arrows {
+            display: flex;
+            gap: 1.5rem;
+            padding-top: 2.5rem;
+        }
+
+        .circular-arrow {
+            width: 2.7rem;
+            height: 2.7rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            border: none;
+            background-color: #141414;
+            color: #f1f1f7;
+        }
+
+        .circular-arrow:hover {
+            background-color: #00a6fb !important;
+            transform: scale(1.08);
+        }
+
+        .circular-arrow svg {
+            width: 28px;
+            height: 28px;
+            fill: currentColor;
+        }
+
+        .circular-dots {
+            display: none;
+            justify-content: center;
+            gap: 10px;
+            padding-top: 20px;
+        }
+
+        .circular-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.15);
+            border: none;
+            padding: 0;
+            transition: background 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+
+        .circular-dot.active {
+            background: var(--pink);
+            transform: scale(1.3);
+        }
+
+        @media (min-width: 768px) {
+            .circular-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 3rem;
+            }
+
+            .circular-arrows {
+                padding-top: 0;
+            }
+
+            .circular-content {
+                min-height: 280px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .circular-images {
+                height: 18rem;
+            }
+
+            .circular-container {
+                padding: 1rem 0;
+            }
+
+            .circular-grid {
+                gap: 2.5rem;
+            }
+
+            .circular-dots {
+                display: flex;
+            }
+
+            .circular-arrows {
+                padding-top: 1.5rem;
+            }
+        }
+
+        /* ============================================================
+           CTA
+           ============================================================ */
+        .cta-section {
+            position: relative;
+            z-index: 1;
+            padding: 100px 0;
+            border-top: 1px solid rgba(232, 67, 147, 0.04);
+            text-align: center;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(245, 240, 255, 0.4));
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .cta-section h2 {
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .cta-section h2 span {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-section p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+
+        .cta-section .btn-primary {
+            font-size: 1.05rem;
+            padding: 18px 48px;
+        }
+
+        /* ============================================================
+           FOOTER — Glass-morphism
+           ============================================================ */
+        .footer-glass {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            margin-top: 3rem;
+            border-radius: 1.5rem 1.5rem 0 0;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(232, 67, 147, 0.06);
+            border-bottom: none;
+            overflow: hidden;
+            padding: 3rem 0 1.5rem;
+        }
+
+        .footer-glass .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-glass::before {
+            content: '';
+            position: absolute;
+            top: -3rem;
+            left: 25%;
+            width: 18rem;
+            height: 18rem;
+            border-radius: 50%;
+            background: var(--pink-glow);
+            filter: blur(80px);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .footer-glass::after {
+            content: '';
+            position: absolute;
+            bottom: -2rem;
+            right: 20%;
+            width: 20rem;
+            height: 20rem;
+            border-radius: 50%;
+            background: var(--cyan-glow);
+            filter: blur(80px);
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+        }
+
+        .footer-brand-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .footer-brand-section .logo {
+            font-size: 1.2rem;
+            gap: 0.75rem;
+        }
+
+        .footer-brand-section .logo img {
+            height: 70px;
+            width: auto;
+            border: none;
+            outline: none;
+            filter: brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(900%) hue-rotate(315deg) brightness(105%) contrast(105%);
+        }
+
+        .footer-brand-section .logo .brand-text {
+            background: linear-gradient(135deg, var(--pink), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            max-width: 280px;
+            margin: 1rem auto 1.5rem;
+        }
+
+        .footer-social-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .footer-social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.4rem;
+            height: 2.4rem;
+            border-radius: 50%;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(232, 67, 147, 0.06);
+        }
+
+        .footer-social-links a:hover {
+            color: var(--pink);
+            background: rgba(232, 67, 147, 0.04);
+            transform: translateY(-3px);
+            border-color: rgba(232, 67, 147, 0.12);
+        }
+
+        .footer-social-links a svg {
+            width: 1.2rem;
+            height: 1.2rem;
+            fill: currentColor;
+        }
+
+        .footer-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .footer-column h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 0.6rem;
+        }
+
+        .footer-column ul li a {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--pink);
+        }
+
+        .footer-column ul li .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-column ul li .contact-item svg {
+            width: 1.1rem;
+            height: 1.1rem;
+            flex-shrink: 0;
+            color: var(--pink);
+        }
+
+        .footer-column ul li .contact-item address {
+            font-style: normal;
+        }
+
+        .footer-bottom {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(232, 67, 147, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            text-align: center;
+        }
+
+        .footer-bottom p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-bottom .footer-bottom-links {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .footer-bottom .footer-bottom-links a {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-bottom .footer-bottom-links a:hover {
+            color: var(--pink);
+        }
+
+        @media (min-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr 2fr;
+                gap: 3rem;
+            }
+
+            .footer-brand-section {
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .footer-description {
+                margin: 1rem 0 1.5rem;
+            }
+
+            .footer-social-links {
+                justify-content: flex-start;
+            }
+
+            .footer-columns {
+                grid-template-columns: repeat(4, 1fr);
+                text-align: left;
+                gap: 1.5rem;
+            }
+
+            .footer-column ul li .contact-item {
+                justify-content: flex-start;
+            }
+
+            .footer-bottom {
+                flex-direction: row;
+                justify-content: space-between;
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .footer-columns {
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+            }
+
+            .footer-glass {
+                border-radius: 1rem 1rem 0 0;
+                padding: 2rem 0 1rem;
+            }
+
+            .footer-brand-section .logo img {
+                height: 50px;
+            }
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 1024px) {
+            .hero .container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero p {
+                max-width: 100%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-actions {
+                justify-content: center;
+            }
+
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .hero-visual {
+                order: -1;
+                max-width: 400px;
+                aspect-ratio: 1 / 1;
+            }
+
+            .stats-banner .container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .hero h1 {
+                font-size: 3.2rem;
+            }
+
+            .stack-card {
+                height: 320px;
+            }
+
+            .hero-visual-label {
+                font-size: 0.55rem;
+                padding: 4px 14px;
+                bottom: 14px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hamburger-toggle {
+                display: flex;
+            }
+
+            .mobile-nav {
+                display: flex;
+            }
+
+            .hero h1 {
+                font-size: 2.6rem;
+            }
+
+            .hero {
+                padding: 100px 0 60px;
+            }
+
+            .hero-visual {
+                max-width: 320px;
+                aspect-ratio: 1 / 1;
+            }
+
+            .stats-banner .container {
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+
+            .stat-item .number {
+                font-size: 2.2rem;
+            }
+
+            .cta-section h2 {
+                font-size: 2.2rem;
+            }
+
+            .logo img {
+                height: 50px;
+            }
+
+            .hero h1 .word {
+                display: inline;
+            }
+
+            .stack-card {
+                height: 280px;
+                padding: 24px;
+            }
+
+            .stack-card h3 {
+                font-size: 1.5rem;
+            }
+
+            .cards-stack {
+                width: 92%;
+                padding: 0 10px;
+            }
+
+            .stack-wrapper {
+                padding-top: 60px;
+                padding-bottom: 30px;
+            }
+
+            .card-wrapper {
+                margin-bottom: 30px;
+            }
+
+            .hero-visual-label {
+                font-size: 0.5rem;
+                padding: 3px 12px;
+                bottom: 10px;
+            }
+
+            .stats-banner {
+                padding: 40px 0;
+            }
+
+            .stat-item {
+                padding: 16px 10px;
+            }
+
+            .features {
+                padding: 60px 0 40px;
+            }
+
+            .features-mobile {
+                padding: 40px 0 60px;
+            }
+
+            .features-mobile .stack-card-mobile {
+                height: 240px;
+                padding: 20px;
+            }
+
+            .features-mobile .stack-card-mobile .icon {
+                font-size: 1.8rem;
+            }
+
+            .features-mobile .stack-card-mobile h4 {
+                font-size: 1rem;
+            }
+
+            .features-mobile .stack-card-mobile p {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .hero-actions .btn-primary,
+            .hero-actions .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .hero-stats {
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+
+            .hero-stat .number {
+                font-size: 1.4rem;
+            }
+
+            .stats-banner .container {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stat-item .number {
+                font-size: 1.8rem;
+            }
+
+            .stat-item {
+                padding: 14px 8px;
+            }
+
+            .container {
+                padding: 0 16px;
+            }
+
+            .logo img {
+                height: 42px;
+            }
+
+            .stack-card {
+                height: 240px;
+                padding: 20px;
+            }
+
+            .stack-card h3 {
+                font-size: 1.2rem;
+            }
+
+            .stack-card p {
+                font-size: 0.85rem;
+            }
+
+            .circular-images {
+                height: 14rem;
+            }
+
+            .circular-container {
+                padding: 0.5rem 0;
+            }
+
+            .circular-grid {
+                gap: 1.5rem;
+            }
+
+            .circular-arrow {
+                width: 2.2rem;
+                height: 2.2rem;
+            }
+
+            .circular-arrow svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .circular-arrows {
+                gap: 1rem;
+            }
+
+            .circular-quote {
+                font-size: 0.95rem;
+            }
+
+            .footer-columns {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+
+            .footer-glass {
+                border-radius: 0.75rem 0.75rem 0 0;
+                padding: 1.5rem 0 1rem;
+            }
+
+            .footer-brand-section .logo img {
+                height: 42px;
+            }
+
+            .hero-visual {
+                max-width: 260px;
+                aspect-ratio: 1 / 1;
+            }
+
+            .hero-visual-label {
+                font-size: 0.45rem;
+                padding: 2px 10px;
+                bottom: 8px;
+            }
+
+            .stats-banner {
+                padding: 30px 0;
+            }
+
+            .stat-item .number {
+                font-size: 1.6rem;
+            }
+
+            .features-mobile .stack-card-mobile {
+                height: 200px;
+                padding: 16px;
+            }
+
+            .features-mobile .stack-card-mobile .icon {
+                font-size: 1.5rem;
+                margin-bottom: 6px;
+            }
+
+            .features-mobile .stack-card-mobile h4 {
+                font-size: 0.9rem;
+            }
+
+            .features-mobile .stack-card-mobile p {
+                font-size: 0.7rem;
+            }
+
+            /* Mobile nav — full width */
+            .mobile-nav {
+                width: 100%;
+                max-width: 100%;
+                padding: 80px 24px 30px;
+            }
+
+            .mobile-nav a {
+                font-size: 1rem;
+                padding: 12px 0;
+            }
+        }
+
+        /* ── Mobile nav full width override ── */
+        @media (max-width: 768px) {
+            .mobile-nav {
+                width: 100%;
+                max-width: 100%;
+                padding: 90px 28px 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mobile-nav {
+                width: 100%;
+                max-width: 100%;
+                padding: 80px 20px 30px;
+            }
+        }
+
+        /* Animation for pulse dot in footer */
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.75;
+            }
+
+            50% {
+                transform: scale(1.8);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============================================================
+    THREE.JS BACKGROUND (global)
+    ============================================================ -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- ============================================================
+    MOBILE OVERLAY
+    ============================================================ -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- ============================================================
+    MOBILE NAV — FULL WIDTH
+    ============================================================ -->
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-label">Navigation</div>
+        <a href="about.html">🏢 About</a>
+        <a href="services.html">⚡ Services</a>
+        <a href="contact.html">💬 Contact</a>
+        <div class="mobile-nav-label" style="margin-top:16px;">Account</div>
+        <a href="login.html" class="nav-cta-mobile">🔑 Login</a>
+    </nav>
+
+    <!-- ============================================================
+    NAVBAR — Glass with Gradient BG (Always)
+    ============================================================ -->
+    <header class="navbar" id="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="logo.webp" alt="Stackly" loading="lazy" />
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html" class="nav-login"><span>🔑 Login</span></a></li>
+            </ul>
+
+            <button class="hamburger-toggle" id="hamburgerToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    HERO — with Three.js Financial Icons
+    ============================================================ -->
+    <section class="hero" id="hero">
+        <div class="container">
+            <div class="hero-content">
+                <span class="hero-badge" id="heroBadge">🚀 FinTech Innovation</span>
+                <h1 id="heroTitle">
+                    <span class="word">The</span>
+                    <span class="word">Future</span>
+                    <span class="word">of</span><br />
+                    <span class="word highlight">Smart</span>
+                    <span class="word highlight">Finance</span>
+                </h1>
+                <p id="heroDesc">
+                    Stackly delivers AI‑powered financial intelligence,
+                    real‑time analytics, and seamless payments — all in one
+                    platform built for the next generation.
+                </p>
+                <div class="hero-actions" id="heroActions">
+                    <a href="404.html" class="btn-primary">
+                        <span>Start Free Trial</span>
+                        <span>→</span>
+                    </a>
+                    <a href="404.html" class="btn-secondary">
+                        Explore Features
+                    </a>
+                </div>
+                <div class="hero-stats" id="heroStats">
+                    <div class="hero-stat">
+                        <span class="number" id="heroStatUsers">0</span>
+                        <span class="label">Active Users</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="number" id="heroStatVolume">0</span>
+                        <span class="label">Transaction Volume</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="number" id="heroStatUptime">0</span>
+                        <span class="label">Uptime</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── THREE.JS HERO VISUAL ── -->
+            <div class="hero-visual" id="heroVisual">
+                <div id="hero-three-container" style="width:100%;height:100%;position:relative;"></div>
+                <span class="hero-visual-label">⚡ Live 3D Analytics</span>
+            </div>
+        </div>
+
+        <!-- ── CURVY WAVE SVG ── -->
+        <div class="hero-curve">
+            <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,40 C360,120 720,0 1080,60 C1260,90 1380,60 1440,40 L1440,120 L0,120 Z" fill="#f5f0ff"
+                    opacity="1" />
+                <path d="M0,60 C240,100 480,20 720,70 C960,120 1200,40 1440,60 L1440,120 L0,120 Z" fill="#f5f0ff"
+                    opacity="0.5" />
+            </svg>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    STATS BANNER
+    ============================================================ -->
+    <section class="stats-banner" id="statsBanner">
+        <div class="container">
+            <div class="stat-item" id="statItem1">
+                <span class="number" id="stat1">0</span>
+                <span class="label">Transactions Processed</span>
+            </div>
+            <div class="stat-item" id="statItem2">
+                <span class="number" id="stat2">0</span>
+                <span class="label">Active Customers</span>
+            </div>
+            <div class="stat-item" id="statItem3">
+                <span class="number" id="stat3">0</span>
+                <span class="label">Countries Served</span>
+            </div>
+            <div class="stat-item" id="statItem4">
+                <span class="number" id="stat4">0</span>
+                <span class="label">Data Points / sec</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    FEATURES — Desktop Orbital Layout (centered)
+    ============================================================ -->
+    <section class="features" id="features">
+        <div class="container">
+            <span class="section-label" id="featuresLabel">✦ Why Stackly</span>
+            <h2 class="section-title" id="featuresTitle">
+                Built for <span>innovation</span>,<br />
+                powered by AI
+            </h2>
+            <p class="section-sub" id="featuresSub">
+                Every feature is designed to give you a competitive edge
+                in the fast‑moving world of FinTech.
+            </p>
+
+            <div class="orbit-container">
+                <div class="orbit-wrapper">
+                    <!-- Center Logo / Ball -->
+                    <div class="orbit-center">
+                        <img src="logo.webp" alt="Stackly" />
+                    </div>
+
+                    <!-- Rotating Ring -->
+                    <div class="orbit-ring" id="orbitRing">
+                        <div class="orbit-card" data-index="0">
+                            <span class="icon">🤖</span>
+                            <h4>AI‑Driven Insights</h4>
+                            <p>Predictive analytics &amp; machine learning models.</p>
+                        </div>
+                        <div class="orbit-card" data-index="1">
+                            <span class="icon">⚡</span>
+                            <h4>Lightning Transactions</h4>
+                            <p>Sub‑second settlement with full transparency.</p>
+                        </div>
+                        <div class="orbit-card" data-index="2">
+                            <span class="icon">🔒</span>
+                            <h4>Bank‑Grade Security</h4>
+                            <p>End‑to‑end encryption &amp; biometric auth.</p>
+                        </div>
+                        <div class="orbit-card" data-index="3">
+                            <span class="icon">📊</span>
+                            <h4>Real‑Time Analytics</h4>
+                            <p>Dashboards with zero latency.</p>
+                        </div>
+                        <div class="orbit-card" data-index="4">
+                            <span class="icon">🌐</span>
+                            <h4>Global Reach</h4>
+                            <p>Multi‑currency &amp; cross‑border payments.</p>
+                        </div>
+                        <div class="orbit-card" data-index="5">
+                            <span class="icon">🧩</span>
+                            <h4>Seamless Integration</h4>
+                            <p>RESTful APIs &amp; SDKs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    FEATURES — Mobile Card Stacking Layout
+    ============================================================ -->
+    <section class="features-mobile" id="features-mobile">
+        <div class="container">
+            <div class="cards-stack-mobile" id="cardsStackMobile">
+                <div class="card-wrapper-mobile">
+                    <div class="stack-card-mobile">
+                        <span class="icon">🤖</span>
+                        <h4>AI‑Driven Insights</h4>
+                        <p>Predictive analytics and machine learning models that surface actionable intelligence in real
+                            time.</p>
+                        <span class="card-tag">Feature 1</span>
+                    </div>
+                </div>
+                <div class="card-wrapper-mobile">
+                    <div class="stack-card-mobile">
+                        <span class="icon">⚡</span>
+                        <h4>Lightning Transactions</h4>
+                        <p>Sub‑second settlement with full transparency and low fees — built for high‑volume processing.
+                        </p>
+                        <span class="card-tag">Feature 2</span>
+                    </div>
+                </div>
+                <div class="card-wrapper-mobile">
+                    <div class="stack-card-mobile">
+                        <span class="icon">🔒</span>
+                        <h4>Bank‑Grade Security</h4>
+                        <p>End‑to‑end encryption, biometric auth, and continuous threat monitoring keep your assets
+                            safe.</p>
+                        <span class="card-tag">Feature 3</span>
+                    </div>
+                </div>
+                <div class="card-wrapper-mobile">
+                    <div class="stack-card-mobile">
+                        <span class="icon">📊</span>
+                        <h4>Real‑Time Analytics</h4>
+                        <p>Dashboards and visualizations that adapt to your workflow with zero latency.</p>
+                        <span class="card-tag">Feature 4</span>
+                    </div>
+                </div>
+                <div class="card-wrapper-mobile">
+                    <div class="stack-card-mobile">
+                        <span class="icon">🌐</span>
+                        <h4>Global Reach</h4>
+                        <p>Multi‑currency, cross‑border payments with local compliance built in across 50+ countries.
+                        </p>
+                        <span class="card-tag">Feature 5</span>
+                    </div>
+                </div>
+                <div class="card-wrapper-mobile">
+                    <div class="stack-card-mobile">
+                        <span class="icon">🧩</span>
+                        <h4>Seamless Integration</h4>
+                        <p>RESTful APIs and SDKs that plug into your existing stack in minutes — not weeks.</p>
+                        <span class="card-tag">Feature 6</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    CARD STACKING SECTION (GSAP) — How It Works (centered)
+    ============================================================ -->
+    <section class="stack-wrapper" id="how-it-works">
+        <div class="container" style="max-width:1200px;margin:0 auto;padding:0 24px;">
+            <span class="section-label" id="stepsLabel">⚡ Simple Steps</span>
+            <h2 class="section-title" id="stepsTitle">
+                Start in <span>minutes</span>,<br />
+                scale infinitely
+            </h2>
+            <p class="section-sub" id="stepsSub">
+                From onboarding to advanced deployment — Stackly grows
+                with your business.
+            </p>
+        </div>
+
+        <div class="cards-stack" id="cardsStack">
+            <div class="card-wrapper">
+                <div class="stack-card one">
+                    <h3>Connect Your Accounts</h3>
+                    <p>Securely link your bank, payment gateways, and data sources with one‑click integrations.</p>
+                    <span class="card-tag">Step 1</span>
+                </div>
+            </div>
+            <div class="card-wrapper">
+                <div class="stack-card two">
+                    <h3>Deploy AI Models</h3>
+                    <p>Choose from pre‑built financial models or bring your own — deploy in a sandbox first.</p>
+                    <span class="card-tag">Step 2</span>
+                </div>
+            </div>
+            <div class="card-wrapper">
+                <div class="stack-card three">
+                    <h3>Monitor &amp; Optimize</h3>
+                    <p>Track performance, adjust strategies, and unlock new insights with every transaction.</p>
+                    <span class="card-tag">Step 3</span>
+                </div>
+            </div>
+            <div class="card-wrapper">
+                <div class="stack-card four">
+                    <h3>Scale Globally</h3>
+                    <p>Expand across borders with built‑in compliance, multi‑currency, and local payment rails.</p>
+                    <span class="card-tag">Step 4</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    CIRCULAR TESTIMONIALS (centered)
+    ============================================================ -->
+    <section class="circular-testimonials-section" id="testimonials">
+        <div class="container">
+            <span class="section-label" id="testimonialsLabel">💬 Trusted by Leaders</span>
+            <h2 class="section-title" id="testimonialsTitle">
+                What our <span>users</span> say
+            </h2>
+            <p class="section-sub" id="testimonialsSub">
+                Real stories from real people who transformed their financial operations with Stackly.
+            </p>
+
+            <div class="circular-container" id="circularTestimonials">
+                <div class="circular-grid">
+                    <div class="circular-images" id="circularImages"></div>
+                    <div class="circular-content" id="circularContent">
+                        <div>
+                            <h3 class="circular-name" id="circularName">—</h3>
+                            <p class="circular-designation" id="circularDesignation">—</p>
+                            <div class="circular-quote" id="circularQuote"></div>
+                        </div>
+                        <div class="circular-arrows">
+                            <button class="circular-arrow" id="circularPrev" aria-label="Previous">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                                </svg>
+                            </button>
+                            <button class="circular-arrow" id="circularNext" aria-label="Next">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="circular-dots" id="circularDots"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    CTA
+    ============================================================ -->
+    <section class="cta-section" id="cta">
+        <div class="container">
+            <h2>
+                Ready to <span>innovate</span><br />
+                your finance stack?
+            </h2>
+            <p>Join thousands of forward‑thinking teams who are already using Stackly to power their financial future.
+            </p>
+            <a href="404.html" class="btn-primary">
+                <span>Start Free Trial</span>
+                <span>→</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    FOOTER — Glass-morphism
+    ============================================================ -->
+    <footer class="footer-glass">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand-section">
+                    <a href="index.html" class="logo">
+                        <img src="logo.webp" alt="Stackly" loading="lazy" />
+                    </a>
+                    <p class="footer-description">
+                        Building beautiful and functional financial experiences with modern technologies. We help
+                        businesses create their digital finance future.
+                    </p>
+                    <div class="footer-social-links">
+                        <a href="404.html" aria-label="Facebook">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                            </svg>
+                        </a>
+                        <a href="404.html" aria-label="Instagram">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                            </svg>
+                        </a>
+                        <a href="404.html" aria-label="Twitter">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                            </svg>
+                        </a>
+                        <a href="404.html" aria-label="GitHub">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.123-.3-.535-1.52.117-3.16 0 0 1.008-.322 3.3 1.23.96-.267 1.98-.399 3-.399s2.04.132 3 .399c2.292-1.552 3.3-1.23 3.3-1.23.653 1.64.24 2.86.118 3.16.768.84 1.233 1.91 1.233 3.22 0 4.61-2.804 5.62-5.476 5.92.43.37.824 1.102.824 2.22 0 1.602-.015 2.894-.015 3.287 0 .322.216.694.825.577C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                            </svg>
+                        </a>
+                        <a href="404.html" aria-label="Dribbble">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 24C5.385 24 0 18.615 0 12S5.385 0 12 0s12 5.385 12 12-5.385 12-12 12zm10.12-10.358c-.35-.11-3.17-.953-6.384-.438 1.34 3.684 1.887 6.684 1.992 7.308a10.174 10.174 0 004.395-6.87zm-6.115 7.808c-.153-.9-.75-4.032-2.19-7.77l-.066.02c-5.79 2.015-7.86 6.025-8.04 6.4a10.143 10.143 0 006.29 2.166c1.42 0 2.77-.29 4.006-.816zM4.67 16.6c.3-.51 3.075-5.09 8.19-6.78l.015-.03c-.3-.66-1.23-2.58-2.19-3.99C6.27 7.63 2.39 10.78 2.39 10.78l-.01.01c-.04.39-.06.8-.06 1.22 0 1.76.51 3.41 1.39 4.82zm13.09-9.55c-2.44 1.83-5.04 2.77-5.16 2.82.87 1.56 1.65 3.14 2.22 4.74 2.73-.87 5.19-.7 6.08-.57.04-.42.07-.85.07-1.28 0-2.02-.68-3.88-1.8-5.44-.03.04-.11.1-.41.25-.01.01-.03.01-.04.02l.04-.02zm-5.64 3.45c-.03-.06-.06-.12-.09-.18-.5-1.01-1.04-2.02-1.62-3.03-.96.48-3.18 1.74-4.95 4.08 1.65-.66 3.68-1.38 6.66-.87z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-columns">
+                    <div class="footer-column">
+                        <h4>About Us</h4>
+                        <ul>
+                            <li><a href="404.html">Company History</a></li>
+                            <li><a href="404.html">Meet the Team</a></li>
+                            <li><a href="404.html">Employee Handbook</a></li>
+                            <li><a href="404.html">Careers</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Our Services</h4>
+                        <ul>
+                            <li><a href="404.html">Web Development</a></li>
+                            <li><a href="404.html">Web Design</a></li>
+                            <li><a href="404.html">Marketing</a></li>
+                            <li><a href="404.html">Google Ads</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Helpful Links</h4>
+                        <ul>
+                            <li><a href="404.html">FAQs</a></li>
+                            <li><a href="404.html">Support</a></li>
+                            <li><a href="404.html" style="display:inline-flex;align-items:center;gap:6px;">
+                                    Live Chat
+                                    <span style="display:inline-flex;position:relative;width:10px;height:10px;">
+                                        <span
+                                            style="position:absolute;inset:0;border-radius:50%;background:var(--pink);opacity:0.75;animation:pulse-dot 2s ease-in-out infinite;"></span>
+                                        <span
+                                            style="position:absolute;inset:2px;border-radius:50%;background:var(--pink);"></span>
+                                    </span>
+                                </a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Contact Us</h4>
+                        <ul>
+                            <li>
+                                <a href="404.html" class="contact-item">
+                                    <svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6ZM20 6L12 11L4 6H20ZM20 18H4V8L12 13L20 8V18Z" />
+                                    </svg>
+                                    hello@stackly.com
+                                </a>
+                            </li>
+                            <li>
+                                <a href="404.html" class="contact-item">
+                                    <svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                                    </svg>
+                                    +1 (555) 123-4567
+                                </a>
+                            </li>
+                            <li>
+                                <a href="404.html" class="contact-item">
+                                    <svg viewBox="0 0 24 24">
+                                        <path
+                                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                                    </svg>
+                                    <address>San Francisco, CA</address>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Stackly. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="404.html">Privacy</a>
+                    <a href="404.html">Terms</a>
+                    <a href="404.html">Security</a>
+                    <a href="404.html">Support</a>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            @keyframes pulse-dot {
+
+                0%,
+                100% {
+                    transform: scale(1);
+                    opacity: 0.75;
+                }
+
+                50% {
+                    transform: scale(1.8);
+                    opacity: 0;
+                }
+            }
+        </style>
+    </footer>
+
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
+    <script>
+        // ============================================================
+        // THREE.JS BACKGROUND (global particle system)
+        // ============================================================
+        (function initThreeBackground() {
+            const canvas = document.getElementById('three-canvas');
+            if (!canvas) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({
+                canvas,
+                alpha: true,
+                antialias: true,
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const particlesGeometry = new THREE.BufferGeometry();
+            const count = 350;
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+
+            const palette = [
+                new THREE.Color('#e84393'),
+                new THREE.Color('#00b4d8'),
+                new THREE.Color('#4361ee'),
+                new THREE.Color('#ff7eb3'),
+                new THREE.Color('#48cae4'),
+            ];
+
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 20;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+                const c = palette[Math.floor(Math.random() * palette.length)];
+                colors[i * 3] = c.r;
+                colors[i * 3 + 1] = c.g;
+                colors[i * 3 + 2] = c.b;
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.07,
+                transparent: true,
+                opacity: 0.5,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true,
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+            camera.position.z = 8;
+
+            let mouseX = 0,
+                mouseY = 0;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            function animateBackground() {
+                requestAnimationFrame(animateBackground);
+                particlesMesh.rotation.x += 0.0003;
+                particlesMesh.rotation.y += 0.0005;
+                particlesMesh.rotation.x += (mouseY * 0.01 - particlesMesh.rotation.x) * 0.02;
+                particlesMesh.rotation.y += (mouseX * 0.01 - particlesMesh.rotation.y) * 0.02;
+                renderer.render(scene, camera);
+            }
+            animateBackground();
+        })();
+
+        // ============================================================
+        // THREE.JS HERO — Financial Icons Orbiting
+        // ============================================================
+        (function initHeroThree() {
+            const container = document.getElementById('hero-three-container');
+            if (!container) return;
+
+            const heroVisual = document.getElementById('heroVisual');
+
+            // Scene setup
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0814);
+
+            const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0.8, 5.5);
+            camera.lookAt(0, 0, 0);
+
+            const renderer = new THREE.WebGLRenderer({
+                alpha: false,
+                antialias: true,
+            });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            container.appendChild(renderer.domElement);
+
+            // ── Lights ──
+            const ambientLight = new THREE.AmbientLight(0x404060, 0.5);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            dirLight.position.set(2, 4, 3);
+            scene.add(dirLight);
+
+            const dirLight2 = new THREE.DirectionalLight(0x8888ff, 0.5);
+            dirLight2.position.set(-3, 1, -2);
+            scene.add(dirLight2);
+
+            const rimLight = new THREE.DirectionalLight(0xff4488, 0.3);
+            rimLight.position.set(-1, -1, -4);
+            scene.add(rimLight);
+
+            // ── Helper function: Draw financial icon on canvas ──
+            function drawIcon(canvas, symbol, color, bgColor, isEmoji = false) {
+                const ctx = canvas.getContext('2d');
+                const size = canvas.width;
+
+                const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+                gradient.addColorStop(0, bgColor);
+                gradient.addColorStop(1, 'rgba(255,255,255,0.03)');
+                ctx.beginPath();
+                ctx.arc(size / 2, size / 2, size / 2 - 4, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.fillStyle = color;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                if (isEmoji) {
+                    ctx.font = `${size * 0.5}px serif`;
+                    ctx.fillText(symbol, size / 2, size / 2 + 2);
+                } else {
+                    ctx.font = `600 ${size * 0.55}px "Inter", sans-serif`;
+                    ctx.fillText(symbol, size / 2, size / 2 + 2);
+                }
+
+                const glow = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+                glow.addColorStop(0, color + '20');
+                glow.addColorStop(1, 'transparent');
+                ctx.fillStyle = glow;
+                ctx.beginPath();
+                ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // ── Create icon sprite ──
+            function createIconSprite(symbol, color, bgColor, size = 0.65, isEmoji = false) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 128;
+                canvas.height = 128;
+                drawIcon(canvas, symbol, color, bgColor, isEmoji);
+
+                const texture = new THREE.CanvasTexture(canvas);
+                texture.needsUpdate = true;
+                const material = new THREE.SpriteMaterial({
+                    map: texture,
+                    transparent: true,
+                    depthWrite: false,
+                    blending: THREE.NormalBlending,
+                    opacity: 0.95,
+                });
+                const sprite = new THREE.Sprite(material);
+                sprite.scale.set(size, size, 1);
+                return sprite;
+            }
+
+            // ── Financial icons data ──
+            const iconData = [
+                { symbol: '$', color: '#f5c842', bg: 'rgba(245,200,66,0.12)' },
+                { symbol: '₿', color: '#f7931a', bg: 'rgba(247,147,26,0.12)' },
+                { symbol: '🏦', color: '#6c8cff', bg: 'rgba(108,140,255,0.10)', isEmoji: true },
+                { symbol: '📈', color: '#2ecc71', bg: 'rgba(46,204,113,0.10)', isEmoji: true },
+                { symbol: '💳', color: '#ff7eb3', bg: 'rgba(255,126,179,0.10)', isEmoji: true },
+                { symbol: '💰', color: '#f5c842', bg: 'rgba(245,200,66,0.10)', isEmoji: true },
+                { symbol: '📊', color: '#48cae4', bg: 'rgba(72,202,228,0.10)', isEmoji: true },
+                { symbol: '🔒', color: '#a78bfa', bg: 'rgba(167,139,250,0.10)', isEmoji: true },
+            ];
+
+            // ── Central element: Golden ring + glowing core ──
+            const ringGeo = new THREE.TorusGeometry(0.9, 0.04, 32, 64);
+            const ringMat = new THREE.MeshPhysicalMaterial({
+                color: 0xf5c842,
+                emissive: 0xf5c842,
+                emissiveIntensity: 0.3,
+                metalness: 0.7,
+                roughness: 0.15,
+                transparent: true,
+                opacity: 0.9,
+            });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2.2;
+            ring.rotation.z = 0.15;
+            scene.add(ring);
+
+            const ringGeo2 = new THREE.TorusGeometry(0.7, 0.025, 24, 48);
+            const ringMat2 = new THREE.MeshPhysicalMaterial({
+                color: 0x00b4d8,
+                emissive: 0x00b4d8,
+                emissiveIntensity: 0.2,
+                metalness: 0.4,
+                roughness: 0.3,
+                transparent: true,
+                opacity: 0.7,
+            });
+            const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
+            ring2.rotation.x = Math.PI / 2.6;
+            ring2.rotation.z = -0.2;
+            scene.add(ring2);
+
+            const glowGeo = new THREE.SphereGeometry(0.25, 16, 16);
+            const glowMat = new THREE.MeshPhysicalMaterial({
+                color: 0xf5c842,
+                emissive: 0xf5c842,
+                emissiveIntensity: 0.6,
+                transparent: true,
+                opacity: 0.3,
+                roughness: 0.1,
+            });
+            const glowSphere = new THREE.Mesh(glowGeo, glowMat);
+            scene.add(glowSphere);
+
+            // Central dollar sign sprite
+            const dollarCanvas = document.createElement('canvas');
+            dollarCanvas.width = 256;
+            dollarCanvas.height = 256;
+            const dCtx = dollarCanvas.getContext('2d');
+            const grad = dCtx.createRadialGradient(128, 128, 0, 128, 128, 128);
+            grad.addColorStop(0, 'rgba(245,200,66,0.15)');
+            grad.addColorStop(1, 'rgba(245,200,66,0)');
+            dCtx.fillStyle = grad;
+            dCtx.beginPath();
+            dCtx.arc(128, 128, 128, 0, Math.PI * 2);
+            dCtx.fill();
+            dCtx.fillStyle = '#f5c842';
+            dCtx.font = '700 110px "Inter", sans-serif';
+            dCtx.textAlign = 'center';
+            dCtx.textBaseline = 'middle';
+            dCtx.shadowColor = 'rgba(245,200,66,0.3)';
+            dCtx.shadowBlur = 40;
+            dCtx.fillText('$', 128, 132);
+            dCtx.shadowBlur = 0;
+
+            const dollarTexture = new THREE.CanvasTexture(dollarCanvas);
+            const dollarMat = new THREE.SpriteMaterial({
+                map: dollarTexture,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+                opacity: 0.95,
+            });
+            const dollarSprite = new THREE.Sprite(dollarMat);
+            dollarSprite.scale.set(0.8, 0.8, 1);
+            scene.add(dollarSprite);
+
+            // ── Orbiting icons ──
+            const icons = [];
+            const orbitRadius = 1.6;
+            const count = iconData.length;
+
+            iconData.forEach((data, i) => {
+                const angle = (i / count) * Math.PI * 2;
+                const size = 0.55 + Math.random() * 0.15;
+                const sprite = createIconSprite(
+                    data.symbol,
+                    data.color,
+                    data.bg,
+                    size,
+                    data.isEmoji || false
+                );
+
+                const x = Math.cos(angle) * orbitRadius;
+                const z = Math.sin(angle) * orbitRadius;
+                const y = Math.sin(angle * 1.5) * 0.25;
+                sprite.position.set(x, y, z);
+
+                sprite.userData = {
+                    angle: angle,
+                    radius: orbitRadius,
+                    speed: 0.3 + Math.random() * 0.15,
+                    floatSpeed: 0.4 + Math.random() * 0.3,
+                    floatAmp: 0.08 + Math.random() * 0.12,
+                    phase: Math.random() * Math.PI * 2,
+                    rotSpeed: 0.5 + Math.random() * 0.5,
+                };
+
+                scene.add(sprite);
+                icons.push(sprite);
+            });
+
+            // ── Additional small orbiting particles (currency symbols) ──
+            const particleIcons = ['$', '€', '£', '¥', '₿'];
+            const smallParticles = [];
+            for (let i = 0; i < 40; i++) {
+                const symbol = particleIcons[i % particleIcons.length];
+                const color = ['#f5c842', '#48cae4', '#ff7eb3', '#a78bfa', '#f7931a'][i % 5];
+                const size = 0.15 + Math.random() * 0.12;
+                const sprite = createIconSprite(symbol, color, 'rgba(255,255,255,0.02)', size, false);
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 0.5 + Math.random() * 2.2;
+                const y = (Math.random() - 0.5) * 1.2;
+                sprite.position.set(
+                    Math.cos(angle) * radius,
+                    y,
+                    Math.sin(angle) * radius
+                );
+                sprite.userData = {
+                    angle: angle,
+                    radius: radius,
+                    speed: 0.1 + Math.random() * 0.15,
+                    floatSpeed: 0.2 + Math.random() * 0.3,
+                    floatAmp: 0.05 + Math.random() * 0.1,
+                    phase: Math.random() * Math.PI * 2,
+                };
+                sprite.material.opacity = 0.2 + Math.random() * 0.3;
+                scene.add(sprite);
+                smallParticles.push(sprite);
+            }
+
+            // ── Mouse tracking ──
+            let mouseX = 0,
+                mouseY = 0;
+            let targetRotX = 0,
+                targetRotY = 0;
+
+            const heroVisualEl = document.getElementById('heroVisual');
+            heroVisualEl.addEventListener('mousemove', (e) => {
+                const rect = heroVisualEl.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                targetRotX = y * 0.2;
+                targetRotY = x * 0.3;
+            });
+
+            heroVisualEl.addEventListener('mouseleave', () => {
+                targetRotX = 0;
+                targetRotY = 0;
+            });
+
+            // ── Resize ──
+            function resizeHero() {
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                if (w > 0 && h > 0) {
+                    camera.aspect = w / h;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(w, h);
+                }
+            }
+
+            window.addEventListener('resize', resizeHero);
+            setTimeout(resizeHero, 100);
+
+            // ── Animation loop ──
+            let time = 0;
+
+            function animateHero() {
+                requestAnimationFrame(animateHero);
+                time += 0.01;
+
+                mouseX += (targetRotY - mouseX) * 0.08;
+                mouseY += (targetRotX - mouseY) * 0.08;
+
+                ring.rotation.y += 0.005;
+                ring2.rotation.y -= 0.007;
+                ring2.rotation.x += 0.002;
+
+                dollarSprite.material.rotation += 0.002;
+
+                icons.forEach((sprite, i) => {
+                    const data = sprite.userData;
+                    data.angle += data.speed * 0.012;
+                    const x = Math.cos(data.angle) * data.radius;
+                    const z = Math.sin(data.angle) * data.radius;
+                    const y = Math.sin(data.angle * 1.5 + data.phase) * data.floatAmp;
+                    sprite.position.set(x, y, z);
+                    sprite.material.rotation += data.rotSpeed * 0.005;
+                });
+
+                smallParticles.forEach((sprite) => {
+                    const data = sprite.userData;
+                    data.angle += data.speed * 0.008;
+                    const x = Math.cos(data.angle) * data.radius;
+                    const z = Math.sin(data.angle) * data.radius;
+                    const y = Math.sin(time * data.floatSpeed + data.phase) * data.floatAmp;
+                    sprite.position.set(x, y, z);
+                });
+
+                camera.position.x = mouseX * 0.4;
+                camera.position.y = 0.8 - mouseY * 0.25;
+                camera.lookAt(0, 0, 0);
+
+                renderer.render(scene, camera);
+            }
+
+            animateHero();
+
+            setTimeout(() => {
+                heroVisual.classList.add('visible');
+            }, 400);
+
+            window.addEventListener('beforeunload', () => {
+                renderer.dispose();
+            });
+        })();
+
+        // ============================================================
+        // CIRCULAR TESTIMONIALS — Robust autoplay
+        // ============================================================
+        (function initCircularTestimonials() {
+            const testimonials = [{
+                quote: "Stackly cut our transaction processing time by 73%. The AI insights are like having a top analyst on your team 24/7.",
+                name: "John Deacon",
+                designation: "CFO, FinCore Group",
+                src: "./assets/five.webp",
+            }, {
+                quote: "We scaled from 500 to 50,000 users in six months without a single infrastructure hiccup. Stackly just works.",
+                name: "Sophia Rivera",
+                designation: "CTO, NexPay",
+                src: "./assets/six.webp",
+            }, {
+                quote: "The real‑time analytics dashboard is a game‑changer. We spotted a market shift 3 days before our competitors.",
+                name: "Marcus Kim",
+                designation: "Head of Strategy, VaultIQ",
+                src: "./assets/seven.webp",
+            }];
+
+            const imagesContainer = document.getElementById('circularImages');
+            const nameEl = document.getElementById('circularName');
+            const designationEl = document.getElementById('circularDesignation');
+            const quoteEl = document.getElementById('circularQuote');
+            const prevBtn = document.getElementById('circularPrev');
+            const nextBtn = document.getElementById('circularNext');
+            const dotsContainer = document.getElementById('circularDots');
+
+            let activeIndex = 0;
+            let autoplayInterval = null;
+            let isAutoplayEnabled = true;
+            const autoplayDelay = 2000;
+
+            function renderImages() {
+                imagesContainer.innerHTML = '';
+                testimonials.forEach((t, i) => {
+                    const img = document.createElement('img');
+                    img.src = t.src;
+                    img.alt = t.name;
+                    img.className = 'circular-image';
+                    img.dataset.index = i;
+                    imagesContainer.appendChild(img);
+                });
+                updateImageTransforms();
+            }
+
+            function calculateGap(width) {
+                const minWidth = 1024;
+                const maxWidth = 1456;
+                const minGap = 60;
+                const maxGap = 86;
+                if (width <= minWidth) return minGap;
+                if (width >= maxWidth) return Math.max(minGap, maxGap + 0.06018 * (width - maxWidth));
+                return minGap + (maxGap - minGap) * ((width - minWidth) / (maxWidth - minWidth));
+            }
+
+            function getContainerWidth() {
+                return imagesContainer.offsetWidth || 600;
+            }
+
+            function updateImageTransforms() {
+                const images = imagesContainer.querySelectorAll('.circular-image');
+                const gap = calculateGap(getContainerWidth());
+                const maxStickUp = gap * 0.8;
+                const len = testimonials.length;
+
+                images.forEach((img, i) => {
+                    const offset = (i - activeIndex + len) % len;
+                    let transform = '';
+                    let zIndex = 1;
+                    let opacity = 0;
+                    let pointerEvents = 'none';
+
+                    if (offset === 0) {
+                        transform = `translateX(0px) translateY(0px) scale(1) rotateY(0deg)`;
+                        zIndex = 3;
+                        opacity = 1;
+                        pointerEvents = 'auto';
+                    } else if (offset === len - 1) {
+                        transform =
+                            `translateX(-${gap}px) translateY(-${maxStickUp}px) scale(0.85) rotateY(15deg)`;
+                        zIndex = 2;
+                        opacity = 1;
+                        pointerEvents = 'auto';
+                    } else if (offset === 1) {
+                        transform =
+                            `translateX(${gap}px) translateY(-${maxStickUp}px) scale(0.85) rotateY(-15deg)`;
+                        zIndex = 2;
+                        opacity = 1;
+                        pointerEvents = 'auto';
+                    } else {
+                        transform = `translateX(0px) translateY(0px) scale(0.7) rotateY(0deg)`;
+                        zIndex = 1;
+                        opacity = 0;
+                        pointerEvents = 'none';
+                    }
+
+                    img.style.transform = transform;
+                    img.style.zIndex = zIndex;
+                    img.style.opacity = opacity;
+                    img.style.pointerEvents = pointerEvents;
+                    img.style.transition = 'all 0.8s cubic-bezier(.4,2,.3,1)';
+                });
+            }
+
+            function animateQuote(text, element) {
+                const words = text.split(' ');
+                element.innerHTML = '';
+                const wordSpans = [];
+
+                words.forEach((word, i) => {
+                    const span = document.createElement('span');
+                    span.className = 'word';
+                    span.textContent = word + ' ';
+                    span.style.transitionDelay = (i * 0.025) + 's';
+                    element.appendChild(span);
+                    wordSpans.push(span);
+                });
+
+                requestAnimationFrame(() => {
+                    wordSpans.forEach((span, i) => {
+                        setTimeout(() => {
+                            span.classList.add('visible');
+                        }, i * 25);
+                    });
+                });
+            }
+
+            function updateContent() {
+                const t = testimonials[activeIndex];
+
+                nameEl.style.transition = 'opacity 0.3s, transform 0.3s';
+                designationEl.style.transition = 'opacity 0.3s, transform 0.3s';
+                nameEl.style.opacity = '0';
+                nameEl.style.transform = 'translateY(10px)';
+                designationEl.style.opacity = '0';
+                designationEl.style.transform = 'translateY(10px)';
+
+                setTimeout(() => {
+                    nameEl.textContent = t.name;
+                    designationEl.textContent = t.designation;
+                    nameEl.style.opacity = '1';
+                    nameEl.style.transform = 'translateY(0)';
+                    designationEl.style.opacity = '1';
+                    designationEl.style.transform = 'translateY(0)';
+                }, 150);
+
+                animateQuote(t.quote, quoteEl);
+
+                document.querySelectorAll('.circular-dot').forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+
+                updateImageTransforms();
+            }
+
+            function goTo(index) {
+                const len = testimonials.length;
+                activeIndex = (index + len) % len;
+                updateContent();
+                if (isAutoplayEnabled) {
+                    startAutoplay();
+                }
+            }
+
+            function next() {
+                goTo(activeIndex + 1);
+            }
+
+            function prev() {
+                goTo(activeIndex - 1);
+            }
+
+            function startAutoplay() {
+                if (autoplayInterval) {
+                    clearInterval(autoplayInterval);
+                    autoplayInterval = null;
+                }
+                if (isAutoplayEnabled) {
+                    autoplayInterval = setInterval(function() {
+                        if (isAutoplayEnabled && autoplayInterval) {
+                            next();
+                        }
+                    }, autoplayDelay);
+                }
+            }
+
+            function stopAutoplay() {
+                if (autoplayInterval) {
+                    clearInterval(autoplayInterval);
+                    autoplayInterval = null;
+                }
+            }
+
+            function enableAutoplay() {
+                isAutoplayEnabled = true;
+                startAutoplay();
+            }
+
+            function disableAutoplay() {
+                isAutoplayEnabled = false;
+                stopAutoplay();
+            }
+
+            function buildDots() {
+                dotsContainer.innerHTML = '';
+                testimonials.forEach((_, i) => {
+                    const dot = document.createElement('button');
+                    dot.className = 'circular-dot' + (i === activeIndex ? ' active' : '');
+                    dot.setAttribute('aria-label', `Go to testimonial ${i + 1}`);
+                    dot.addEventListener('click', () => {
+                        goTo(i);
+                    });
+                    dotsContainer.appendChild(dot);
+                });
+            }
+
+            function onKeydown(e) {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    prev();
+                }
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    next();
+                }
+            }
+
+            function onResize() {
+                updateImageTransforms();
+            }
+
+            function init() {
+                renderImages();
+                buildDots();
+                updateContent();
+                setTimeout(function() {
+                    isAutoplayEnabled = true;
+                    startAutoplay();
+                }, 500);
+
+                prevBtn.addEventListener('click', function() {
+                    disableAutoplay();
+                    prev();
+                    setTimeout(function() {
+                        if (!autoplayInterval && isAutoplayEnabled) {
+                            startAutoplay();
+                        }
+                    }, 3000);
+                });
+
+                nextBtn.addEventListener('click', function() {
+                    disableAutoplay();
+                    next();
+                    setTimeout(function() {
+                        if (!autoplayInterval && isAutoplayEnabled) {
+                            startAutoplay();
+                        }
+                    }, 3000);
+                });
+
+                document.addEventListener('keydown', onKeydown);
+                window.addEventListener('resize', onResize);
+
+                const container = document.getElementById('circularTestimonials');
+                container.addEventListener('mouseenter', function() {
+                    disableAutoplay();
+                });
+                container.addEventListener('mouseleave', function() {
+                    enableAutoplay();
+                });
+
+                document.addEventListener('visibilitychange', function() {
+                    if (document.hidden) {
+                        if (autoplayInterval) {
+                            stopAutoplay();
+                        }
+                    } else {
+                        if (isAutoplayEnabled && !autoplayInterval) {
+                            startAutoplay();
+                        }
+                    }
+                });
+            }
+
+            const testimonialSection = document.querySelector('.circular-testimonials-section');
+            if (testimonialSection) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            if (isAutoplayEnabled && !autoplayInterval) {
+                                startAutoplay();
+                            }
+                        }
+                    });
+                }, { threshold: 0.15 });
+
+                observer.observe(testimonialSection);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+
+        // ============================================================
+        // GSAP — All Animations
+        // ============================================================
+        (function initGSAP() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // ── HERO ──
+            const heroWords = document.querySelectorAll('#heroTitle .word');
+            const heroBadge = document.getElementById('heroBadge');
+            const heroDesc = document.getElementById('heroDesc');
+            const heroActions = document.getElementById('heroActions');
+            const heroStats = document.getElementById('heroStats');
+
+            const heroTL = gsap.timeline({ defaults: { ease: 'power3.out' } });
+            heroTL
+                .to(heroBadge, { opacity: 1, y: 0, duration: 0.6 })
+                .to(heroWords, {
+                    opacity: 1,
+                    y: 0,
+                    rotateX: 0,
+                    duration: 0.8,
+                    stagger: 0.08,
+                    ease: 'power3.out',
+                }, '-=0.3')
+                .to(heroDesc, { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
+                .to(heroActions, { opacity: 1, y: 0, duration: 0.6 }, '-=0.3')
+                .to(heroStats, { opacity: 1, y: 0, duration: 0.6 }, '-=0.2');
+
+            // ── STATS COUNTER ──
+            const statItems = document.querySelectorAll('.stat-item');
+            statItems.forEach((item, index) => {
+                gsap.fromTo(item, { opacity: 0, y: 30 }, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    delay: index * 0.15,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: item,
+                        start: 'top 90%',
+                        toggleActions: 'play none none none',
+                    },
+                });
+            });
+
+            const stats = [
+                { id: 'stat1', target: 2840000, suffix: '' },
+                { id: 'stat2', target: 18470, suffix: '' },
+                { id: 'stat3', target: 54, suffix: '' },
+                { id: 'stat4', target: 3400, suffix: 'k' },
+            ];
+
+            stats.forEach((s) => {
+                const el = document.getElementById(s.id);
+                if (!el) return;
+                const item = el.closest('.stat-item');
+                if (!item) return;
+                ScrollTrigger.create({
+                    trigger: item,
+                    start: 'top 85%',
+                    onEnter: () => animateCounterGSAP(el, s.target, s.suffix),
+                    once: true,
+                });
+            });
+
+            function animateCounterGSAP(element, target, suffix) {
+                let obj = { val: 0 };
+                gsap.to(obj, {
+                    val: target,
+                    duration: 2.2,
+                    ease: 'power2.out',
+                    onUpdate: () => {
+                        let val = Math.round(obj.val);
+                        if (suffix === 'k') {
+                            element.textContent = (val / 1000).toFixed(1) + 'k';
+                        } else if (suffix === '%') {
+                            element.textContent = val + '%';
+                        } else {
+                            element.textContent = val.toLocaleString();
+                        }
+                    },
+                });
+            }
+
+            const heroStatConfigs = [
+                { id: 'heroStatUsers', target: 18470, suffix: 'k' },
+                { id: 'heroStatVolume', target: 1290, suffix: 'k' },
+                { id: 'heroStatUptime', target: 99.99, suffix: '%' },
+            ];
+            heroStatConfigs.forEach((s) => {
+                const el = document.getElementById(s.id);
+                if (!el) return;
+                setTimeout(() => animateCounterGSAP(el, s.target, s.suffix), 1200);
+            });
+
+            // ── SECTION LABELS ──
+            const sectionReveals = [
+                { id: 'featuresLabel', delay: 0 },
+                { id: 'featuresTitle', delay: 0.1 },
+                { id: 'featuresSub', delay: 0.2 },
+                { id: 'stepsLabel', delay: 0 },
+                { id: 'stepsTitle', delay: 0.1 },
+                { id: 'stepsSub', delay: 0.2 },
+                { id: 'testimonialsLabel', delay: 0 },
+                { id: 'testimonialsTitle', delay: 0.1 },
+                { id: 'testimonialsSub', delay: 0.2 },
+            ];
+
+            sectionReveals.forEach((item) => {
+                const el = document.getElementById(item.id);
+                if (!el) return;
+                gsap.fromTo(el, { opacity: 0, y: 30 }, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.7,
+                    delay: item.delay,
+                    ease: 'power3.out',
+                    scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' },
+                });
+            });
+
+            // ── MOBILE CARD STACKING — GSAP animation ──
+            const mobileCards = gsap.utils.toArray(".card-wrapper-mobile");
+            mobileCards.forEach((wrapper, i) => {
+                const card = wrapper.querySelector('.stack-card-mobile');
+                if (!card) return;
+                gsap.fromTo(card, {
+                    opacity: 0,
+                    y: 50,
+                    scale: 0.95,
+                }, {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    duration: 0.8,
+                    delay: i * 0.15,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: wrapper,
+                        start: 'top 88%',
+                        toggleActions: 'play none none none',
+                    },
+                });
+            });
+
+            // ── HOW IT WORKS — CARD STACKING ──
+            const cardsWrappers = gsap.utils.toArray(".card-wrapper");
+            const cards = gsap.utils.toArray(".stack-card");
+
+            cardsWrappers.forEach((wrapper, i) => {
+                const card = cards[i];
+                if (!card) return;
+                let scale = 1,
+                    rotation = 0;
+                if (i !== cards.length - 1) {
+                    scale = 0.9 + 0.025 * i;
+                    rotation = -10;
+                }
+                gsap.to(card, {
+                    scale: scale,
+                    rotationX: rotation,
+                    transformOrigin: "top center",
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: wrapper,
+                        start: "top " + (60 + 10 * i),
+                        end: "bottom 550",
+                        endTrigger: ".stack-wrapper",
+                        scrub: true,
+                        pin: wrapper,
+                        pinSpacing: false,
+                        id: i + 1,
+                    },
+                });
+            });
+
+            // ── NAVBAR ──
+            const navbar = document.getElementById('navbar');
+            ScrollTrigger.create({
+                trigger: document.body,
+                start: 'top top',
+                end: 'bottom bottom',
+                onUpdate: (self) => {
+                    const progress = self.progress;
+                    const tiltX = (progress - 0.5) * 2;
+                    navbar.style.transform = `rotateX(${tiltX * 0.3}deg)`;
+                },
+            });
+
+            window.addEventListener('scroll', () => {
+                navbar.classList.toggle('scrolled', window.scrollY > 40);
+            });
+
+            // ── CTA ──
+            const ctaSection = document.getElementById('cta');
+            gsap.fromTo(ctaSection, { opacity: 0, y: 50 }, {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: ctaSection, start: 'top 85%', toggleActions: 'play none none none' },
+            });
+
+            ScrollTrigger.refresh();
+
+            // ── MOBILE NAV ──
+            const hamburger = document.getElementById('hamburgerToggle');
+            const mobileNav = document.getElementById('mobileNav');
+            const overlay = document.getElementById('mobileOverlay');
+
+            function openMobileNav() {
+                mobileNav.classList.add('open');
+                overlay.classList.add('active');
+                hamburger.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMobileNav() {
+                mobileNav.classList.remove('open');
+                overlay.classList.remove('active');
+                hamburger.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            if (hamburger) {
+                hamburger.addEventListener('click', () => {
+                    mobileNav.classList.contains('open') ? closeMobileNav() : openMobileNav();
+                });
+            }
+            if (overlay) overlay.addEventListener('click', closeMobileNav);
+
+            document.querySelectorAll('.mobile-nav a').forEach(link => {
+                link.addEventListener('click', closeMobileNav);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && mobileNav && mobileNav.classList.contains('open')) closeMobileNav();
+            });
+
+            // ── SMOOTH SCROLL ──
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    const target = document.querySelector(targetId);
+                    if (target) {
+                        e.preventDefault();
+                        const top = target.getBoundingClientRect().top + window.pageYOffset - 80;
+                        window.scrollTo({ top, behavior: 'smooth' });
+                    }
+                });
+            });
+
+            console.log('✦ Stackly — Orbital Features Section Initialized');
+        })();
+
+        // ============================================================
+        // ORBIT ROTATION ENGINE (Pure JS) — Desktop only
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const ring = document.getElementById('orbitRing');
+            if (!ring) return;
+
+            const cards = ring.querySelectorAll('.orbit-card');
+            const wrapper = document.querySelector('.orbit-wrapper');
+
+            // Only run on desktop (>= 769px)
+            if (window.innerWidth < 769) return;
+
+            // Card dimensions (will be updated dynamically)
+            let cardWidth = 170;
+            let cardHeight = 200;
+            const count = cards.length;
+
+            function getCenterAndRadius() {
+                const rect = wrapper.getBoundingClientRect();
+                const size = Math.min(rect.width, rect.height);
+                const radius = size * 0.39;
+                return { x: rect.width / 2, y: rect.height / 2, radius: radius };
+            }
+
+            function updatePositions(rotation) {
+                const { x: centerX, y: centerY, radius } = getCenterAndRadius();
+                const angleStep = (Math.PI * 2) / count;
+
+                cards.forEach((card, i) => {
+                    const angle = i * angleStep + rotation;
+                    const x = centerX + Math.cos(angle) * radius - cardWidth / 2;
+                    const y = centerY + Math.sin(angle) * radius - cardHeight / 2;
+                    card.style.left = x + 'px';
+                    card.style.top = y + 'px';
+                });
+            }
+
+            // Initial position update after render
+            setTimeout(() => {
+                const firstCard = cards[0];
+                if (firstCard) {
+                    const rect = firstCard.getBoundingClientRect();
+                    if (rect.width > 0 && rect.height > 0) {
+                        cardWidth = rect.width;
+                        cardHeight = rect.height;
+                    }
+                }
+                updatePositions(0);
+            }, 100);
+
+            // Rotation loop using requestAnimationFrame (never pauses)
+            let rotation = 0;
+            const speed = 0.004;
+
+            function animateOrbit() {
+                rotation += speed;
+                if (rotation > Math.PI * 2) rotation -= Math.PI * 2;
+                updatePositions(rotation);
+                requestAnimationFrame(animateOrbit);
+            }
+
+            // Start the animation
+            animateOrbit();
+
+            // Handle window resize
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    const firstCard = cards[0];
+                    if (firstCard) {
+                        const rect = firstCard.getBoundingClientRect();
+                        if (rect.width > 0 && rect.height > 0) {
+                            cardWidth = rect.width;
+                            cardHeight = rect.height;
+                        }
+                    }
+                    updatePositions(rotation);
+                }, 100);
+            });
+
+            // Re-run on load
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    const firstCard = cards[0];
+                    if (firstCard) {
+                        const rect = firstCard.getBoundingClientRect();
+                        if (rect.width > 0 && rect.height > 0) {
+                            cardWidth = rect.width;
+                            cardHeight = rect.height;
+                        }
+                    }
+                    updatePositions(rotation);
+                }, 300);
+            });
+
+            console.log('Orbit animation started (desktop).');
+        });
+    </script>
+
+</body>
+
+</html>
